@@ -28,6 +28,7 @@ import {
 export function AppSidebar() {
   const pathname = usePathname();
   const isDashboard = pathname === "/";
+  const isUpload = pathname?.startsWith("/upload");
   const isDocuments = pathname?.startsWith("/documents");
 
   return (
@@ -41,7 +42,7 @@ export function AppSidebar() {
               tooltip="Clinical Console"
             >
               <span className="mt-0.5 inline-flex group-data-[collapsible=icon]:mt-0">
-               <Stethoscope />
+                <Stethoscope />
               </span>
               <span className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
                 <span className="text-sm font-semibold tracking-tight">
@@ -52,7 +53,6 @@ export function AppSidebar() {
                 </span>
               </span>
             </SidebarMenuButton>
-           
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -72,8 +72,12 @@ export function AppSidebar() {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Upload & summarize">
-                  <Link href="/">
+                <SidebarMenuButton
+                  asChild
+                  isActive={!!isUpload}
+                  tooltip="Upload & summarize"
+                >
+                  <Link href="/upload">
                     <FileText />
                     <span>Upload & summarize</span>
                   </Link>

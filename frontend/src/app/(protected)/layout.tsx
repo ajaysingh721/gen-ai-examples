@@ -9,6 +9,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from "next/link";
 
 export default function ProtectedLayout({
   children,
@@ -38,6 +47,24 @@ export default function ProtectedLayout({
     return null;
   }
 
+  const normalizedPath = pathname ?? "/";
+  const dashboardCrumb = { href: "/", label: "Dashboard" };
+  const currentCrumb = (() => {
+    if (normalizedPath === "/") return dashboardCrumb;
+    if (normalizedPath.startsWith("/upload")) {
+      return { href: "/upload", label: "Upload & summarize" };
+    }
+    if (normalizedPath.startsWith("/documents")) {
+      return { href: "/documents", label: "Recent documents" };
+    }
+
+    const segment = normalizedPath.split("/").filter(Boolean)[0] ?? "";
+    const label = segment
+      ? segment.charAt(0).toUpperCase() + segment.slice(1)
+      : "Dashboard";
+    return { href: normalizedPath, label };
+  })();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-background text-foreground flex">
@@ -45,8 +72,31 @@ export default function ProtectedLayout({
 
         <SidebarInset>
           <main className="flex-1 flex flex-col">
-            <div className="px-4 pt-4">
+            <div className="px-4 pt-4 flex items-center gap-2">
               <SidebarTrigger />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  {normalizedPath === "/" ? (
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{dashboardCrumb.label}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  ) : (
+                    <>
+                      <BreadcrumbItem>
+                        <BreadcrumbLink asChild>
+                          <Link href={dashboardCrumb.href}>
+                            {dashboardCrumb.label}
+                          </Link>
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>{currentCrumb.label}</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </>
+                  )}
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
             <div className="flex-1 flex px-4 py-8">
               {children}
