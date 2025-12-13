@@ -207,6 +207,11 @@ cd frontend
 npm run dev
 ```
 
+**Verify all services are running:**
+- Backend: http://127.0.0.1:8000/docs should load
+- Ollama: `ollama list` should work
+- Frontend: http://localhost:3000 should load
+
 ### Stop Everything
 
 - Backend: `Ctrl+C` in the backend terminal
