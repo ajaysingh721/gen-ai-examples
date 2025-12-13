@@ -6,7 +6,7 @@
   },
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {
-      "file": ".vscode/templete/copilot-commit-message-instructions.md"
+      "file": ".github/templete/copilot-commit-message-instructions.md"
     }
   ]
 }
