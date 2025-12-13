@@ -1,0 +1,38 @@
+{
+  "name": "gen-ai-examples",
+  "version": "1.0.0",
+  "description": "Gen AI examples",
+  "main": "dist/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajaysingh721/gen-ai-examples.git"
+  },
+  "keywords": [
+    "Gen",
+    "AI",
+    "AI examples"
+  ],
+  "author": "Ajay Singh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ajaysingh721/gen-ai-examples/issues"
+  },
+  "homepage": "https://github.com/ajaysingh721/gen-ai-examples#readme",
+  "devDependencies": {
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "prettier": "^3.0.0"
+    
+  },
+  "workspaces": [
+    "packages/uitls",
+    "packages/common",
+    "packages/typescript-config",
+    "apps/server",
+    "apps/web",
+    "apps/agents"
+  ]
+}
