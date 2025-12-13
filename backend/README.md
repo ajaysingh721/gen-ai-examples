@@ -16,7 +16,7 @@
 From the `backend` directory:
 
 ```bash
-uvicorn app:main --reload
+uvicorn app.main:app --reload
 ```
 
 Then open http://127.0.0.1:8000 in your browser. The automatic docs are at:

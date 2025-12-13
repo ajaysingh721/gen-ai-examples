@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   FileText,
   History,
-  LayoutDashboard,
+  Home,
   LogOut,
   Settings,
   Stethoscope,
@@ -27,7 +27,7 @@ import {
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const isDashboard = pathname === "/";
+  const isHome = pathname === "/";
   const isUpload = pathname?.startsWith("/upload");
   const isDocuments = pathname?.startsWith("/documents");
 
@@ -37,15 +37,15 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              size="default"
+              size="lg"
               className="pointer-events-none"
               tooltip="Clinical Console"
             >
-              <span className="mt-0.5 inline-flex group-data-[collapsible=icon]:mt-0">
+              <span className="mt-0.5 ml-2 inline-flex group-data-[collapsible=icon]:mt-0">
                 <Stethoscope />
               </span>
-              <span className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-                <span className="text-sm font-semibold tracking-tight">
+              <span className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden whitespace-normal! overflow-visible!">
+                <span className="text-base font-semibold tracking-tight">
                   Clinical Console
                 </span>
                 <span className="text-[11px] text-muted-foreground">
@@ -63,10 +63,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isDashboard} tooltip="Dashboard">
+                <SidebarMenuButton asChild isActive={isHome} tooltip="Home">
                   <Link href="/">
-                    <LayoutDashboard />
-                    <span>Dashboard</span>
+                    <Home />
+                    <span>Home</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

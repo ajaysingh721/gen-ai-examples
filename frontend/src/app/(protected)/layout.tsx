@@ -48,9 +48,9 @@ export default function ProtectedLayout({
   }
 
   const normalizedPath = pathname ?? "/";
-  const dashboardCrumb = { href: "/", label: "Dashboard" };
+  const homeCrumb = { href: "/", label: "Home" };
   const currentCrumb = (() => {
-    if (normalizedPath === "/") return dashboardCrumb;
+    if (normalizedPath === "/") return homeCrumb;
     if (normalizedPath.startsWith("/upload")) {
       return { href: "/upload", label: "Upload & summarize" };
     }
@@ -61,7 +61,7 @@ export default function ProtectedLayout({
     const segment = normalizedPath.split("/").filter(Boolean)[0] ?? "";
     const label = segment
       ? segment.charAt(0).toUpperCase() + segment.slice(1)
-      : "Dashboard";
+      : "Home";
     return { href: normalizedPath, label };
   })();
 
@@ -78,14 +78,14 @@ export default function ProtectedLayout({
                 <BreadcrumbList>
                   {normalizedPath === "/" ? (
                     <BreadcrumbItem>
-                      <BreadcrumbPage>{dashboardCrumb.label}</BreadcrumbPage>
+                      <BreadcrumbPage>{homeCrumb.label}</BreadcrumbPage>
                     </BreadcrumbItem>
                   ) : (
                     <>
                       <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                          <Link href={dashboardCrumb.href}>
-                            {dashboardCrumb.label}
+                          <Link href={homeCrumb.href}>
+                            {homeCrumb.label}
                           </Link>
                         </BreadcrumbLink>
                       </BreadcrumbItem>

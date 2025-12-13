@@ -61,7 +61,7 @@ export default function DocumentsPage() {
 
       {!loading && !error && documents.length === 0 && (
         <p className="text-sm text-zinc-500">
-          No documents found yet. Upload and analyze a document on the dashboard
+          No documents found yet. Upload and analyze a document 
           to see it appear here.
         </p>
       )}

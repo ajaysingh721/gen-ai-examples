@@ -9,11 +9,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function DashboardPage() {
+export default function HomePage() {
   return (
     <div className="w-full max-w-4xl space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Home</h1>
         <p className="text-sm text-muted-foreground">
           Quick access to document analysis and recent results.
         </p>
