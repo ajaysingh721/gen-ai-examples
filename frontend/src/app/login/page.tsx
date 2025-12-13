@@ -62,6 +62,20 @@ function LoginForm() {
     router.push(result?.url ?? callbackUrl);
   }
 
+  async function onMockSso() {
+    const result = await signIn("mock-sso", {
+      redirect: false,
+      callbackUrl,
+    });
+
+    if (result?.error) {
+      toast.error("SSO sign-in is currently disabled.");
+      return;
+    }
+
+    router.push(result?.url ?? callbackUrl);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4">
       <Card className="w-full max-w-md">
@@ -124,6 +138,24 @@ function LoginForm() {
               </CardFooter>
             </form>
           </Form>
+
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            onClick={onMockSso}
+          >
+            Continue with SSO (mock)
+          </Button>
         </CardContent>
       </Card>
     </div>

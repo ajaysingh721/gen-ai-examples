@@ -23,6 +23,21 @@ const handler = NextAuth({
         return null;
       },
     }),
+
+    // Mock SSO provider (one-click sign-in) for local demos.
+    Credentials({
+      id: "mock-sso",
+      name: "Mock SSO",
+      credentials: {},
+      async authorize() {
+        const enabled = (process.env.MOCK_SSO_ENABLED ?? "true").toLowerCase();
+        if (enabled === "false" || enabled === "0") {
+          return null;
+        }
+
+        return { id: "mock-sso-user", name: "SSO User", role: "user" } as any;
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
