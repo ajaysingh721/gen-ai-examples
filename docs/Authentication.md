@@ -54,11 +54,13 @@ NEXTAUTH_ADMIN_PASSWORD=admin123
 Generate a secure random secret for `NEXTAUTH_SECRET`:
 
 **Using OpenSSL**:
+
 ```bash
 openssl rand -base64 32
 ```
 
 **Using Node.js**:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
@@ -68,12 +70,12 @@ Visit: https://generate-secret.vercel.app/32
 
 ### Environment Variables Explained
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `NEXTAUTH_SECRET` | Secret key for JWT encryption | Yes | None |
-| `NEXTAUTH_URL` | Application base URL | Yes | http://localhost:3000 |
-| `NEXTAUTH_ADMIN_USERNAME` | Admin username | No | admin |
-| `NEXTAUTH_ADMIN_PASSWORD` | Admin password | No | admin123 |
+| Variable                  | Description                   | Required | Default               |
+| ------------------------- | ----------------------------- | -------- | --------------------- |
+| `NEXTAUTH_SECRET`         | Secret key for JWT encryption | Yes      | None                  |
+| `NEXTAUTH_URL`            | Application base URL          | Yes      | http://localhost:3000 |
+| `NEXTAUTH_ADMIN_USERNAME` | Admin username                | No       | admin                 |
+| `NEXTAUTH_ADMIN_PASSWORD` | Admin password                | No       | admin123              |
 
 ## NextAuth Configuration
 
@@ -82,56 +84,56 @@ Visit: https://generate-secret.vercel.app/32
 **File**: `frontend/src/app/api/auth/[...nextauth]/route.ts`
 
 ```typescript
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const adminUsername = process.env.NEXTAUTH_ADMIN_USERNAME || 'admin'
-        const adminPassword = process.env.NEXTAUTH_ADMIN_PASSWORD || 'admin123'
+        const adminUsername = process.env.NEXTAUTH_ADMIN_USERNAME || "admin";
+        const adminPassword = process.env.NEXTAUTH_ADMIN_PASSWORD || "admin123";
 
         if (
           credentials?.username === adminUsername &&
           credentials?.password === adminPassword
         ) {
           return {
-            id: '1',
+            id: "1",
             name: adminUsername,
-            email: `${adminUsername}@example.com`
-          }
+            email: `${adminUsername}@example.com`,
+          };
         }
-        
-        return null
-      }
-    })
+
+        return null;
+      },
+    }),
   ],
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
   callbacks: {
     async session({ session, token }) {
-      return session
+      return session;
     },
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
       }
-      return token
-    }
+      return token;
+    },
   },
   session: {
-    strategy: "jwt"
-  }
-})
+    strategy: "jwt",
+  },
+});
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
 ```
 
 ## Authentication Flow
@@ -161,18 +163,16 @@ Wrap your app with `SessionProvider`:
 
 ```typescript
 // frontend/src/app/layout.tsx
-import { SessionProvider } from "next-auth/react"
+import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
-  )
+  );
 }
 ```
 
@@ -181,26 +181,26 @@ export default function RootLayout({ children }) {
 Access session data in client components:
 
 ```typescript
-"use client"
+"use client";
 
-import { useSession } from "next-auth/react"
+import { useSession } from "next-auth/react";
 
 export default function Profile() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   if (status === "unauthenticated") {
-    return <div>Access Denied</div>
+    return <div>Access Denied</div>;
   }
 
   return (
     <div>
       <p>Signed in as {session?.user?.name}</p>
     </div>
-  )
+  );
 }
 ```
 
@@ -209,29 +209,29 @@ export default function Profile() {
 Programmatically sign in:
 
 ```typescript
-"use client"
+"use client";
 
-import { signIn } from "next-auth/react"
+import { signIn } from "next-auth/react";
 
 export default function LoginForm() {
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     const result = await signIn("credentials", {
       username: e.target.username.value,
       password: e.target.password.value,
-      redirect: false
-    })
+      redirect: false,
+    });
 
     if (result?.error) {
-      console.error("Login failed")
+      console.error("Login failed");
     } else {
       // Redirect on success
-      window.location.href = "/"
+      window.location.href = "/";
     }
-  }
+  };
 
-  return <form onSubmit={handleSubmit}>...</form>
+  return <form onSubmit={handleSubmit}>...</form>;
 }
 ```
 
@@ -240,16 +240,14 @@ export default function LoginForm() {
 Log out the user:
 
 ```typescript
-"use client"
+"use client";
 
-import { signOut } from "next-auth/react"
+import { signOut } from "next-auth/react";
 
 export default function LogoutButton() {
   return (
-    <button onClick={() => signOut({ callbackUrl: '/login' })}>
-      Logout
-    </button>
-  )
+    <button onClick={() => signOut({ callbackUrl: "/login" })}>Logout</button>
+  );
 }
 ```
 
@@ -258,33 +256,33 @@ export default function LogoutButton() {
 ### Get Session in Server Component
 
 ```typescript
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth";
 
 export default async function ProtectedPage() {
-  const session = await getServerSession()
+  const session = await getServerSession();
 
   if (!session) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  return <div>Welcome, {session.user.name}</div>
+  return <div>Welcome, {session.user.name}</div>;
 }
 ```
 
 ### Get Session in API Route
 
 ```typescript
-import { getServerSession } from "next-auth"
-import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession()
+  const session = await getServerSession();
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  return NextResponse.json({ data: "Protected data" })
+  return NextResponse.json({ data: "Protected data" });
 }
 ```
 
@@ -295,14 +293,14 @@ export async function GET(request: NextRequest) {
 **File**: `frontend/src/app/(protected)/layout.tsx`
 
 ```typescript
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export default async function ProtectedLayout({ children }) {
-  const session = await getServerSession()
+  const session = await getServerSession();
 
   if (!session) {
-    redirect('/login')
+    redirect("/login");
   }
 
   return (
@@ -310,24 +308,24 @@ export default async function ProtectedLayout({ children }) {
       {/* Sidebar, header, etc. */}
       {children}
     </div>
-  )
+  );
 }
 ```
 
 ### Option 2: Page-Level Protection
 
 ```typescript
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const session = await getServerSession()
+  const session = await getServerSession();
 
   if (!session) {
-    redirect('/login')
+    redirect("/login");
   }
 
-  return <div>Dashboard Content</div>
+  return <div>Dashboard Content</div>;
 }
 ```
 
@@ -336,17 +334,17 @@ export default async function DashboardPage() {
 **File**: `frontend/src/middleware.ts`
 
 ```typescript
-import { withAuth } from "next-auth/middleware"
+import { withAuth } from "next-auth/middleware";
 
 export default withAuth({
   callbacks: {
-    authorized: ({ token }) => !!token
+    authorized: ({ token }) => !!token,
   },
-})
+});
 
 export const config = {
-  matcher: ['/((?!login|api/auth).*)']
-}
+  matcher: ["/((?!login|api/auth).*)"],
+};
 ```
 
 ## Session Configuration
@@ -356,11 +354,13 @@ export const config = {
 The app uses JWT (JSON Web Tokens) for sessions:
 
 **Benefits**:
+
 - No server-side session storage needed
 - Scalable across multiple servers
 - Fast validation
 
 **Configuration**:
+
 ```typescript
 session: {
   strategy: "jwt",
@@ -374,18 +374,18 @@ session: {
 For production, consider database sessions:
 
 ```typescript
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database"
+    strategy: "database",
   },
   // ...
-}
+};
 ```
 
 ## Custom Login Page
@@ -393,12 +393,14 @@ export const authOptions = {
 The login page is located at `frontend/src/app/login/page.tsx`:
 
 **Features**:
+
 - Custom form styling
 - Error messages
 - Loading states
 - No sidebar (standalone layout)
 
 **Customization**:
+
 - Update form fields
 - Change styling
 - Add password reset link
@@ -409,6 +411,7 @@ The login page is located at `frontend/src/app/login/page.tsx`:
 ### Current Status
 
 Backend API endpoints are **not authenticated**. Anyone can:
+
 - Upload documents
 - List documents
 - Delete documents
@@ -424,7 +427,7 @@ Share NextAuth JWT with backend:
 ```typescript
 // Frontend: Send JWT in headers
 const session = await getSession()
-fetch('http://localhost:8000/api/v1/documents', {
+fetch('http://localhost:8000/api/v1/api/v1/documents', {
   headers: {
     'Authorization': `Bearer ${session.accessToken}`
   }
@@ -508,11 +511,11 @@ async authorize(credentials) {
   const user = await db.user.findUnique({
     where: { username: credentials.username }
   })
-  
+
   if (user && await bcrypt.compare(credentials.password, user.password)) {
     return { id: user.id, name: user.username }
   }
-  
+
   return null
 }
 ```
@@ -530,11 +533,11 @@ async authorize(credentials) {
   const admin = admins.find(
     a => a.username === credentials.username && a.password === credentials.password
   )
-  
+
   if (admin) {
     return { id: admin.username, name: admin.username }
   }
-  
+
   return null
 }
 ```
@@ -544,6 +547,7 @@ async authorize(credentials) {
 ### "No session found" on protected routes
 
 **Solution**:
+
 1. Check that SessionProvider wraps your app
 2. Verify NEXTAUTH_SECRET is set
 3. Clear browser cookies and try again
@@ -551,6 +555,7 @@ async authorize(credentials) {
 ### Login redirects but session not persisted
 
 **Solution**:
+
 1. Check NEXTAUTH_URL matches your domain
 2. Ensure cookies are enabled in browser
 3. Verify JWT strategy is configured
@@ -558,6 +563,7 @@ async authorize(credentials) {
 ### "authorize() returned null"
 
 **Solution**:
+
 1. Verify credentials match environment variables
 2. Check for typos in username/password
 3. Console.log credentials in authorize() to debug
@@ -565,6 +571,7 @@ async authorize(credentials) {
 ### Session expired unexpectedly
 
 **Solution**:
+
 1. Increase maxAge in session config
 2. Check server/client time synchronization
 3. Verify JWT secret hasn't changed

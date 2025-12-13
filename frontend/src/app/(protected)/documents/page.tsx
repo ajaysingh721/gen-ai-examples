@@ -54,7 +54,7 @@ export default function DocumentsPage() {
     if (!activeDoc) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/documents/${activeDoc.id}`, {
+      const res = await fetch(`http://localhost:8000/api/v1/documents/${activeDoc.id}`, {
         method: "DELETE",
       });
 
@@ -84,7 +84,7 @@ export default function DocumentsPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:8000/documents?limit=50");
+        const res = await fetch("http://localhost:8000/api/v1/documents?limit=50");
         if (!res.ok) {
           setError("Failed to load documents.");
           return;

@@ -5,6 +5,7 @@ This document describes the architecture, structure, and key components of the N
 ## Overview
 
 The frontend is built with **Next.js 16** using the App Router, featuring:
+
 - Server Components by default
 - File-based routing
 - Modern React 19 features
@@ -58,6 +59,7 @@ frontend/
 ### App Router
 
 Next.js 16 uses the App Router (not Pages Router):
+
 - Routes are defined by folder structure in `src/app/`
 - Each route can have `page.tsx` (page component)
 - Each route can have `layout.tsx` (shared layout)
@@ -66,6 +68,7 @@ Next.js 16 uses the App Router (not Pages Router):
 ### Route Groups
 
 Route groups organize routes without affecting URL structure:
+
 - `(protected)/` - Groups protected pages
 - URL doesn't include `(protected)` in the path
 - Allows shared layouts for grouped routes
@@ -88,6 +91,7 @@ Route groups organize routes without affecting URL structure:
 **File**: `src/app/login/page.tsx`
 
 **Features:**
+
 - No sidebar layout (standalone page)
 - Uses NextAuth credentials provider
 - Form with username and password
@@ -95,6 +99,7 @@ Route groups organize routes without affecting URL structure:
 - Redirects to `/` (dashboard) on success
 
 **Default Credentials:**
+
 - Username: `admin`
 - Password: `admin123`
 
@@ -107,6 +112,7 @@ All routes under `(protected)` require authentication.
 **File**: `src/app/(protected)/page.tsx`
 
 **Features:**
+
 - Main landing page after login
 - Shows overview/welcome message
 - Statistics or quick actions
@@ -117,9 +123,10 @@ All routes under `(protected)` require authentication.
 **File**: `src/app/(protected)/upload/page.tsx`
 
 **Features:**
+
 - File upload form
 - Accepts PDF and TIFF files
-- Calls backend API: `POST /documents/analyze`
+- Calls backend API: `POST /api/v1/documents/analyze`
 - Shows loading state during analysis
 - Displays results:
   - Document type classification
@@ -128,32 +135,37 @@ All routes under `(protected)` require authentication.
 - Error handling for upload failures
 
 **Implementation Highlights:**
+
 ```typescript
 // Client component for interactivity
-"use client"
+"use client";
 
 // File upload handling
 const handleUpload = async (file: File) => {
-  const formData = new FormData()
-  formData.append('file', file)
-  
-  const response = await fetch('http://localhost:8000/documents/analyze', {
-    method: 'POST',
-    body: formData
-  })
-  
-  const result = await response.json()
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(
+    "http://localhost:8000/api/v1/documents/analyze",
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const result = await response.json();
   // Display result
-}
+};
 ```
 
-#### Recent Documents (`/documents`)
+#### Recent Documents (`/api/v1/documents`)
 
-**File**: `src/app/(protected)/documents/page.tsx`
+**File**: `src/app/(protected)/api/v1/documents/page.tsx`
 
 **Features:**
+
 - Lists recently analyzed documents
-- Fetches from backend: `GET /documents?limit=20`
+- Fetches from backend: `GET /api/v1/documents?limit=20`
 - Table/list view showing:
   - Filename
   - Document type
@@ -169,6 +181,7 @@ const handleUpload = async (file: File) => {
 **File**: `src/app/layout.tsx`
 
 **Purpose:**
+
 - Wraps entire application
 - Includes `<html>` and `<body>` tags
 - Provides SessionProvider for NextAuth
@@ -180,6 +193,7 @@ const handleUpload = async (file: File) => {
 **File**: `src/app/(protected)/layout.tsx`
 
 **Purpose:**
+
 - Wraps all protected routes
 - Includes sidebar navigation
 - Includes breadcrumb component
@@ -187,11 +201,12 @@ const handleUpload = async (file: File) => {
 - Redirects to login if not authenticated
 
 **Structure:**
+
 ```typescript
 export default function ProtectedLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex h-screen">
@@ -201,7 +216,7 @@ export default function ProtectedLayout({
         {children}
       </main>
     </div>
-  )
+  );
 }
 ```
 
@@ -221,6 +236,7 @@ Built with **shadcn/ui** - a collection of reusable components:
 - **And more...**
 
 All components are:
+
 - Fully typed with TypeScript
 - Styled with Tailwind CSS
 - Accessible (ARIA attributes)
@@ -231,6 +247,7 @@ All components are:
 #### Sidebar (`components/sidebar.tsx`)
 
 **Features:**
+
 - Navigation menu
 - Active route highlighting
 - Icons from `lucide-react`
@@ -244,6 +261,7 @@ All components are:
 #### Breadcrumb (`components/breadcrumb.tsx`)
 
 **Features:**
+
 - Shows current page path
 - Dynamic based on route
 - Helps with navigation context
@@ -258,6 +276,7 @@ All components are:
 **Provider**: Credentials (username/password)
 
 **Flow:**
+
 1. User submits login form
 2. NextAuth calls authorize function
 3. Credentials checked against environment variables
@@ -266,6 +285,7 @@ All components are:
 6. User redirected to callback URL
 
 **Session Management:**
+
 - Server-side session validation
 - Client-side hooks: `useSession()`, `signIn()`, `signOut()`
 - Protected routes check session on load
@@ -273,17 +293,17 @@ All components are:
 ### Protecting Routes
 
 ```typescript
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export default async function ProtectedPage() {
-  const session = await getServerSession()
-  
+  const session = await getServerSession();
+
   if (!session) {
-    redirect('/login')
+    redirect("/login");
   }
-  
-  return <div>Protected Content</div>
+
+  return <div>Protected Content</div>;
 }
 ```
 
@@ -306,12 +326,14 @@ export default async function ProtectedPage() {
 ### Tailwind CSS v4
 
 **Features:**
+
 - Utility-first CSS framework
 - JIT (Just-In-Time) compiler
 - Custom configuration in `tailwind.config.ts`
 - Dark mode support (optional)
 
 **Common Patterns:**
+
 ```tsx
 // Flexbox layout
 <div className="flex items-center gap-4">
@@ -338,14 +360,17 @@ export default async function ProtectedPage() {
 **File**: `src/lib/utils.ts`
 
 Combines class names intelligently:
-```typescript
-import { cn } from "@/lib/utils"
 
-<div className={cn(
-  "base-classes",
-  condition && "conditional-classes",
-  className // Allow prop override
-)} />
+```typescript
+import { cn } from "@/lib/utils";
+
+<div
+  className={cn(
+    "base-classes",
+    condition && "conditional-classes",
+    className // Allow prop override
+  )}
+/>;
 ```
 
 ## Data Fetching
@@ -354,33 +379,33 @@ import { cn } from "@/lib/utils"
 
 ```typescript
 async function fetchDocuments() {
-  const res = await fetch('http://localhost:8000/documents', {
-    cache: 'no-store' // or 'force-cache'
-  })
-  return res.json()
+  const res = await fetch("http://localhost:8000/api/v1/documents", {
+    cache: "no-store", // or 'force-cache'
+  });
+  return res.json();
 }
 
 export default async function DocumentsPage() {
-  const documents = await fetchDocuments()
-  return <DocumentList documents={documents} />
+  const documents = await fetchDocuments();
+  return <DocumentList documents={documents} />;
 }
 ```
 
 ### From Client Components
 
 ```typescript
-"use client"
+"use client";
 
 export default function UploadPage() {
-  const [documents, setDocuments] = useState([])
-  
+  const [documents, setDocuments] = useState([]);
+
   useEffect(() => {
-    fetch('http://localhost:8000/documents')
-      .then(res => res.json())
-      .then(setDocuments)
-  }, [])
-  
-  return <div>...</div>
+    fetch("http://localhost:8000/api/v1/documents")
+      .then((res) => res.json())
+      .then(setDocuments);
+  }, []);
+
+  return <div>...</div>;
 }
 ```
 
@@ -389,33 +414,33 @@ export default function UploadPage() {
 ### React Hook Form + Zod
 
 ```typescript
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 const schema = z.object({
   username: z.string().min(1),
-  password: z.string().min(1)
-})
+  password: z.string().min(1),
+});
 
 export default function LoginForm() {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       username: "",
-      password: ""
-    }
-  })
-  
+      password: "",
+    },
+  });
+
   const onSubmit = (data) => {
     // Handle form submission
-  }
-  
-  return <form onSubmit={form.handleSubmit(onSubmit)}>
-    {/* Form fields */}
-  </form>
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)}>{/* Form fields */}</form>
+  );
 }
 ```
 
@@ -470,6 +495,7 @@ NEXTAUTH_URL=http://localhost:3000
 ## Testing (Future)
 
 Recommended tools:
+
 - **Jest**: Unit testing
 - **React Testing Library**: Component testing
 - **Playwright**: E2E testing
@@ -486,6 +512,7 @@ Recommended tools:
 ## Browser Support
 
 Supports all modern browsers:
+
 - Chrome
 - Firefox
 - Safari

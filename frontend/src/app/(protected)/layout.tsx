@@ -54,8 +54,8 @@ export default function ProtectedLayout({
     if (normalizedPath.startsWith("/upload")) {
       return { href: "/upload", label: "Upload & summarize" };
     }
-    if (normalizedPath.startsWith("/documents")) {
-      return { href: "/documents", label: "Recent documents" };
+    if (normalizedPath.startsWith("/api/v1/documents")) {
+      return { href: "/api/v1/documents", label: "Recent documents" };
     }
 
     const segment = normalizedPath.split("/").filter(Boolean)[0] ?? "";

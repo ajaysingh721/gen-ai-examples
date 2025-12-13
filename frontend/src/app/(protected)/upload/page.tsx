@@ -70,7 +70,7 @@ export default function UploadSummarizePage() {
       const response: DocumentAnalysisResponse = await new Promise(
         (resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          xhr.open("POST", "http://localhost:8000/documents/analyze");
+          xhr.open("POST", "http://localhost:8000/api/v1/documents/analyze");
 
           xhr.upload.onprogress = (progressEvent) => {
             if (progressEvent.lengthComputable) {

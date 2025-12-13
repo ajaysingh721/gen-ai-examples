@@ -20,7 +20,7 @@ Generate a Git commit message for this repository.
 ## Scope hints for this repo
 
 - Frontend changes: mention route/UI/auth/sidebar changes.
-- Backend changes: mention API endpoints, OCR/LLM behavior, DB persistence.
+- Backend changes: mention API endpoints, OCR/api/v1/llm behavior, DB persistence.
 - Tooling changes: mention tasks, settings, build/run commands.
 
 ## Examples

@@ -25,35 +25,42 @@ Currently, the backend API does **not require authentication**. The frontend han
 
 Upload and analyze a clinical document (PDF or TIFF).
 
-**Endpoint**: `POST /api/v1/documents/analyze`
+**Endpoint**: `POST /api/v1/api/v1/documents/analyze`
 
 **Request**:
+
 - Content-Type: `multipart/form-data`
 - Body:
   - `file`: Binary file (PDF or TIFF)
 
 **Example using curl**:
+
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/documents/analyze" \
+curl -X POST "http://127.0.0.1:8000/api/v1/api/v1/documents/analyze" \
   -H "accept: application/json" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@/path/to/document.pdf"
 ```
 
 **Example using JavaScript**:
+
 ```javascript
-const formData = new FormData()
-formData.append('file', fileInput.files[0])
+const formData = new FormData();
+formData.append("file", fileInput.files[0]);
 
-const response = await fetch('http://127.0.0.1:8000/api/v1/documents/analyze', {
-  method: 'POST',
-  body: formData
-})
+const response = await fetch(
+  "http://127.0.0.1:8000/api/v1/api/v1/documents/analyze",
+  {
+    method: "POST",
+    body: formData,
+  }
+);
 
-const result = await response.json()
+const result = await response.json();
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "id": 1,
@@ -66,6 +73,7 @@ const result = await response.json()
 ```
 
 **Response Fields**:
+
 - `id` (integer): Database record ID
 - `filename` (string): Original filename
 - `doc_type` (string): Document classification
@@ -80,6 +88,7 @@ const result = await response.json()
 **Error Responses**:
 
 400 Bad Request:
+
 ```json
 {
   "detail": "Invalid file type. Only PDF and TIFF files are supported."
@@ -87,6 +96,7 @@ const result = await response.json()
 ```
 
 422 Unprocessable Entity:
+
 ```json
 {
   "detail": [
@@ -100,6 +110,7 @@ const result = await response.json()
 ```
 
 500 Internal Server Error:
+
 ```json
 {
   "detail": "Error processing document: [error message]"
@@ -110,24 +121,30 @@ const result = await response.json()
 
 Retrieve a list of recently analyzed documents.
 
-**Endpoint**: `GET /api/v1/documents`
+**Endpoint**: `GET /api/v1/api/v1/documents`
 
 **Query Parameters**:
+
 - `limit` (integer, optional): Maximum number of results (default: 20)
 
 **Example Request**:
+
 ```bash
-curl -X GET "http://127.0.0.1:8000/api/v1/documents?limit=10" \
+curl -X GET "http://127.0.0.1:8000/api/v1/api/v1/documents?limit=10" \
   -H "accept: application/json"
 ```
 
 **Example using JavaScript**:
+
 ```javascript
-const response = await fetch('http://127.0.0.1:8000/api/v1/documents?limit=10')
-const documents = await response.json()
+const response = await fetch(
+  "http://127.0.0.1:8000/api/v1/api/v1/documents?limit=10"
+);
+const documents = await response.json();
 ```
 
 **Response** (200 OK):
+
 ```json
 [
   {
@@ -163,25 +180,32 @@ const documents = await response.json()
 
 Delete a specific document analysis from the database.
 
-**Endpoint**: `DELETE /api/v1/documents/{doc_id}`
+**Endpoint**: `DELETE /api/v1/api/v1/documents/{doc_id}`
 
 **Path Parameters**:
+
 - `doc_id` (integer): The document ID to delete
 
 **Example Request**:
+
 ```bash
-curl -X DELETE "http://127.0.0.1:8000/api/v1/documents/1" \
+curl -X DELETE "http://127.0.0.1:8000/api/v1/api/v1/documents/1" \
   -H "accept: application/json"
 ```
 
 **Example using JavaScript**:
+
 ```javascript
-const response = await fetch('http://127.0.0.1:8000/api/v1/documents/1', {
-  method: 'DELETE'
-})
+const response = await fetch(
+  "http://127.0.0.1:8000/api/v1/api/v1/documents/1",
+  {
+    method: "DELETE",
+  }
+);
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -190,6 +214,7 @@ const response = await fetch('http://127.0.0.1:8000/api/v1/documents/1', {
 ```
 
 **Error Response** (404 Not Found):
+
 ```json
 {
   "detail": "Document not found"
@@ -203,12 +228,14 @@ Check if the API is running (if implemented).
 **Endpoint**: `GET /`
 
 **Example Request**:
+
 ```bash
 curl -X GET "http://127.0.0.1:8000/" \
   -H "accept: application/json"
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "status": "healthy",
@@ -221,9 +248,11 @@ curl -X GET "http://127.0.0.1:8000/" \
 The API classifies documents into four categories:
 
 ### 1. discharge_summary
+
 **Description**: Patient discharge summaries when leaving the hospital
 
 **Typical Content**:
+
 - Patient demographics
 - Admission/discharge dates
 - Diagnosis
@@ -234,9 +263,11 @@ The API classifies documents into four categories:
 **Example Classification Keywords**: "discharge", "discharged", "discharge summary", "post-discharge"
 
 ### 2. inpatient_document
+
 **Description**: Any in-hospital documentation
 
 **Includes**:
+
 - Progress notes
 - History & Physical (H&P)
 - Consultation notes
@@ -246,9 +277,11 @@ The API classifies documents into four categories:
 **Example Classification Keywords**: "progress note", "consultation", "operative report", "H&P"
 
 ### 3. census
+
 **Description**: Patient census reports or lists
 
 **Typical Content**:
+
 - Patient lists
 - Bed assignments
 - Unit/service information
@@ -258,16 +291,19 @@ The API classifies documents into four categories:
 **Example Classification Keywords**: "census", "patient list", "bed assignment", "unit census"
 
 ### 4. junk
+
 **Description**: Non-meaningful or corrupted documents
 
 **Includes**:
+
 - Scanning errors
 - Blank pages
 - Noise/artifacts
 - Very short or empty content
 - Non-medical content
 
-**Classification Criteria**: 
+**Classification Criteria**:
+
 - Text length < 100 characters
 - No recognizable medical content
 - Corrupted/unreadable text
@@ -279,12 +315,14 @@ The API uses **Ollama** for AI-powered features:
 ### Document Classification
 
 **Process**:
+
 1. Extract first 4000 characters of document
 2. Send to LLM with classification prompt
 3. LLM responds with category
 4. Fallback to heuristics if unclear
 
 **Prompt Template**:
+
 ```
 You are a clinical documentation classifier.
 Given the following clinical or administrative document,
@@ -306,12 +344,14 @@ Category:
 ### Document Summarization
 
 **Process**:
+
 1. Extract first 4000 characters of document
 2. Send to LLM with summarization prompt
 3. LLM generates 3-5 bullet points
 4. Return plain language summary
 
 **Prompt Template**:
+
 ```
 You are a clinical documentation assistant.
 Summarize the following medical document in 3-5 bullet points,
@@ -324,6 +364,7 @@ Summary:
 ```
 
 **Parameters**:
+
 - `max_tokens`: 256 (adjustable)
 - Model: mistral (default)
 
@@ -334,12 +375,14 @@ Summary:
 **Library**: PyPDF
 
 **Process**:
+
 1. Open PDF with PdfReader
 2. Iterate through all pages
 3. Extract text from each page
 4. Concatenate with newlines
 
 **Limitations**:
+
 - Text-based PDFs only (not scanned images)
 - Complex layouts may have extraction issues
 - Tables may not preserve structure
@@ -349,16 +392,19 @@ Summary:
 **Library**: Tesseract OCR (via pytesseract)
 
 **Process**:
+
 1. Open TIFF with Pillow
 2. Iterate through all frames (pages)
 3. Apply OCR to each frame
 4. Concatenate results
 
 **Requirements**:
+
 - Tesseract must be installed
 - `tesseract.exe` must be on PATH (Windows)
 
 **Limitations**:
+
 - OCR accuracy depends on image quality
 - Handwritten text may not be recognized
 - Processing is slower than PDF extraction
@@ -368,21 +414,25 @@ Summary:
 ### Common Errors
 
 **1. File Upload Errors**
+
 - Missing file in request
 - File too large
 - Invalid file type
 
 **2. Text Extraction Errors**
+
 - Corrupted PDF/TIFF file
 - Tesseract not installed
 - Unreadable content
 
 **3. LLM Errors**
+
 - Ollama not running
 - Model not available
 - Connection timeout
 
 **4. Database Errors**
+
 - Database locked
 - Disk space full
 - Invalid query
@@ -402,6 +452,7 @@ All errors follow FastAPI's standard format:
 Currently, there is **no rate limiting** on the API.
 
 **Recommendations for Production**:
+
 - Implement rate limiting middleware
 - Use tools like `slowapi` or `fastapi-limiter`
 - Set reasonable limits (e.g., 10 requests/minute per IP)
@@ -409,6 +460,7 @@ Currently, there is **no rate limiting** on the API.
 ## CORS Configuration
 
 The API allows CORS from:
+
 - `http://localhost:3000`
 - `http://127.0.0.1:3000`
 
@@ -426,17 +478,18 @@ origins = [
 
 ### document_analyses Table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | INTEGER | Primary key (auto-increment) |
-| filename | VARCHAR | Original filename |
-| doc_type | VARCHAR | Document classification |
-| summary | TEXT | AI-generated summary |
-| text_length | INTEGER | Length of extracted text |
-| raw_text | TEXT | Full extracted text |
-| created_at | DATETIME | Timestamp of creation |
+| Column      | Type     | Description                  |
+| ----------- | -------- | ---------------------------- |
+| id          | INTEGER  | Primary key (auto-increment) |
+| filename    | VARCHAR  | Original filename            |
+| doc_type    | VARCHAR  | Document classification      |
+| summary     | TEXT     | AI-generated summary         |
+| text_length | INTEGER  | Length of extracted text     |
+| raw_text    | TEXT     | Full extracted text          |
+| created_at  | DATETIME | Timestamp of creation        |
 
 **Indexes**:
+
 - Primary key on `id`
 - Index on `created_at` for efficient sorting
 
@@ -445,11 +498,13 @@ origins = [
 ### Response Times
 
 **Typical response times**:
+
 - Document analysis: 5-30 seconds (depends on LLM speed)
 - List documents: < 100ms
 - Delete document: < 50ms
 
 **Factors affecting speed**:
+
 1. **LLM inference time**: Largest factor (5-20 seconds)
 2. **Text extraction**:
    - PDF: Fast (< 1 second)
@@ -475,6 +530,7 @@ origins = [
 6. View response below
 
 **Benefits**:
+
 - Interactive testing
 - Automatic request formatting
 - Response examples
@@ -485,21 +541,23 @@ origins = [
 Currently, no official SDK is provided. Use standard HTTP clients:
 
 **Python**:
+
 ```python
 import requests
 
 # Upload document
 with open('document.pdf', 'rb') as f:
     files = {'file': f}
-    response = requests.post('http://127.0.0.1:8000/api/v1/documents/analyze', files=files)
+    response = requests.post('http://127.0.0.1:8000/api/v1/api/v1/documents/analyze', files=files)
     result = response.json()
 
 # List documents
-response = requests.get('http://127.0.0.1:8000/api/v1/documents?limit=10')
+response = requests.get('http://127.0.0.1:8000/api/v1/api/v1/documents?limit=10')
 documents = response.json()
 ```
 
 **JavaScript/TypeScript**:
+
 ```typescript
 // See examples in endpoint sections above
 ```

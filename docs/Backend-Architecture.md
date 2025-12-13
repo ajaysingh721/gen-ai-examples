@@ -5,6 +5,7 @@ This document describes the architecture, structure, and key components of the F
 ## Overview
 
 The backend is built with **FastAPI**, a modern Python web framework that provides:
+
 - High performance (comparable to NodeJS and Go)
 - Automatic API documentation (Swagger/OpenAPI)
 - Type safety with Pydantic
@@ -57,6 +58,7 @@ app = FastAPI(title="Backend API", version="0.1.0")
 ```
 
 **Key Features:**
+
 - CORS middleware configured for localhost:3000
 - Database table creation on startup
 - API router inclusion
@@ -70,13 +72,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./documents.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./api/v1/documents.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 ```
 
 **Features:**
+
 - SQLite for simplicity and portability
 - Session management with SessionLocal
 - Declarative base for ORM models
@@ -88,7 +91,7 @@ Database models using SQLAlchemy ORM:
 ```python
 class DocumentAnalysis(Base):
     __tablename__ = "document_analyses"
-    
+
     id: Integer (Primary Key)
     filename: String
     doc_type: String (discharge_summary, inpatient_document, census, junk)
@@ -99,6 +102,7 @@ class DocumentAnalysis(Base):
 ```
 
 **Document Types:**
+
 1. **discharge_summary**: Patient discharge summaries
 2. **inpatient_document**: Progress notes, H&P, consults
 3. **census**: Patient census lists
@@ -109,11 +113,13 @@ class DocumentAnalysis(Base):
 Pydantic models for request/response validation:
 
 **Document Schemas:**
+
 - `DocumentType`: Enum for document categories
 - `DocumentRecord`: Response schema for document list
 - `DocumentAnalysisResponse`: Response for document analysis
 
 **LLM Schemas:**
+
 - Request/response models for LLM interactions
 
 ### 5. Services
@@ -125,32 +131,38 @@ Handles all document processing logic:
 **Key Functions:**
 
 1. **`extract_text_from_pdf(file_obj: BinaryIO) -> str`**
+
    - Uses PyPDF to extract text from PDF files
    - Iterates through all pages
    - Concatenates text with newlines
 
 2. **`extract_text_from_tiff(file_obj: BinaryIO) -> str`**
+
    - Uses Pillow to open TIFF images
    - Applies Tesseract OCR to each frame
    - Handles multi-page TIFF files
 
 3. **`classify_document_type(text: str) -> DocumentType`**
+
    - Uses LLM to classify document type
    - Sends first 4000 characters to LLM
    - Falls back to heuristics if LLM output is unclear
    - Returns one of: discharge_summary, inpatient_document, census, junk
 
 4. **`summarize_document(text: str, max_tokens: int = 256) -> str`**
+
    - Generates 3-5 bullet point summary
    - Sends first 4000 characters to LLM
    - Returns plain language clinical summary
 
 5. **`persist_document_analysis(...) -> DocumentAnalysis`**
+
    - Saves analysis results to database
    - Creates new DocumentAnalysis record
    - Returns the persisted object
 
 6. **`list_recent_documents(limit: int = 20) -> list[DocumentRecord]`**
+
    - Queries database for recent analyses
    - Orders by created_at descending
    - Returns list of DocumentRecord schemas
@@ -159,13 +171,14 @@ Handles all document processing logic:
    - Deletes a document analysis by ID
    - Returns True if deleted, False if not found
 
-#### LLM Service (`services/llm_service.py`)
+#### LLM Service (`services/api/v1/llm_service.py`)
 
 Handles interaction with the local Ollama LLM:
 
 **Key Functions:**
 
 1. **`get_ollama_client() -> Client`**
+
    - Creates and caches Ollama client
    - Uses `@lru_cache` for singleton pattern
    - Configurable base URL via `OLLAMA_BASE_URL`
@@ -176,6 +189,7 @@ Handles interaction with the local Ollama LLM:
    - Returns generated text
 
 **Environment Variables:**
+
 - `OLLAMA_BASE_URL`: Ollama server URL (default: `http://localhost:11434`)
 - `OLLAMA_MODEL`: Model to use (default: `mistral`)
 
@@ -183,7 +197,8 @@ Handles interaction with the local Ollama LLM:
 
 #### Documents Route
 
-**POST `/api/v1/documents/analyze`**
+**POST `/api/v1/api/v1/documents/analyze`**
+
 - Upload PDF or TIFF file
 - Extract text
 - Classify document type
@@ -191,12 +206,14 @@ Handles interaction with the local Ollama LLM:
 - Persist to database
 - Return analysis results
 
-**GET `/api/v1/documents`**
+**GET `/api/v1/api/v1/documents`**
+
 - List recent document analyses
 - Query parameter: `limit` (default: 20)
 - Returns array of document records
 
-**DELETE `/api/v1/documents/{doc_id}`**
+**DELETE `/api/v1/api/v1/documents/{doc_id}`**
+
 - Delete a specific document analysis
 - Path parameter: `doc_id` (integer)
 - Returns success status
@@ -205,7 +222,7 @@ Handles interaction with the local Ollama LLM:
 
 ### Document Analysis Flow
 
-1. **Client uploads file** → POST `/api/v1/documents/analyze`
+1. **Client uploads file** → POST `/api/v1/api/v1/documents/analyze`
 2. **Route handler** receives multipart file upload
 3. **Service layer**:
    - Determines file type (PDF or TIFF)
@@ -243,6 +260,7 @@ dependencies = [
 ## Performance Considerations
 
 1. **Text Truncation**: Documents are truncated to 4000 characters before LLM processing to:
+
    - Reduce latency
    - Stay within token limits
    - Save computational resources
@@ -265,19 +283,22 @@ dependencies = [
 Test the backend using:
 
 1. **Swagger UI**: http://127.0.0.1:8000/docs
+
    - Interactive API testing
    - Try out all endpoints
    - View request/response schemas
 
 2. **ReDoc**: http://127.0.0.1:8000/redoc
+
    - Alternative documentation view
    - Better for reading/understanding
 
 3. **curl/Postman**: Direct HTTP requests
 
 Example curl:
+
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/documents/analyze" \
+curl -X POST "http://127.0.0.1:8000/api/v1/api/v1/documents/analyze" \
   -H "accept: application/json" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@document.pdf"

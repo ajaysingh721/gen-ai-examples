@@ -21,6 +21,7 @@ This guide covers common issues and their solutions when working with the Clinic
 **Problem**: "Python 3.12+ is required"
 
 **Solution**:
+
 ```bash
 # Check Python version
 python --version
@@ -36,6 +37,7 @@ python --version
 **Problem**: "Node.js version mismatch"
 
 **Solution**:
+
 ```bash
 # Check Node.js version
 node --version
@@ -52,6 +54,7 @@ nvm use --lts
 **Problem**: "ERROR: Could not install packages"
 
 **Solution**:
+
 ```bash
 # Upgrade pip
 python -m pip install --upgrade pip
@@ -70,6 +73,7 @@ pip install -e .
 **Problem**: "npm ERR! code ERESOLVE"
 
 **Solution**:
+
 ```bash
 # Clear npm cache
 npm cache clean --force
@@ -91,6 +95,7 @@ npm install --force
 **Problem**: "ModuleNotFoundError: No module named 'app'"
 
 **Solution**:
+
 ```bash
 # Ensure you're in the backend directory
 cd backend
@@ -111,6 +116,7 @@ uvicorn app.main:app --reload
 **Problem**: "ERROR: [Errno 48] Address already in use"
 
 **Solution**:
+
 ```bash
 # Find process using port 8000
 # Windows
@@ -129,6 +135,7 @@ uvicorn app.main:app --reload --port 8001
 **Problem**: "OperationalError: unable to open database file"
 
 **Solution**:
+
 ```bash
 # Ensure backend directory is writable
 # Check permissions
@@ -144,6 +151,7 @@ python -c "from app.core.db import Base, engine; Base.metadata.create_all(bind=e
 **Problem**: "ImportError: cannot import name 'X'"
 
 **Solution**:
+
 ```bash
 # Reinstall dependencies
 pip uninstall -y fastapi sqlalchemy uvicorn
@@ -160,6 +168,7 @@ pip install -e .
 **Problem**: "Error: Cannot find module 'next'"
 
 **Solution**:
+
 ```bash
 # Ensure you're in frontend directory
 cd frontend
@@ -177,6 +186,7 @@ npm run dev
 **Problem**: "Port 3000 is already in use"
 
 **Solution**:
+
 ```bash
 # Find and kill process
 # Windows
@@ -195,6 +205,7 @@ npm run dev -- -p 3001
 **Problem**: "NextAuth: NEXTAUTH_SECRET not set"
 
 **Solution**:
+
 ```bash
 # Create .env.local file
 cd frontend
@@ -212,6 +223,7 @@ echo "NEXTAUTH_SECRET=<generated-secret>" >> .env.local
 **Problem**: "User logged out immediately after login"
 
 **Solution**:
+
 1. Clear browser cookies
 2. Check NEXTAUTH_URL matches current URL
 3. Ensure NEXTAUTH_SECRET is set
@@ -223,6 +235,7 @@ echo "NEXTAUTH_SECRET=<generated-secret>" >> .env.local
 **Problem**: "npm run build" fails
 
 **Solution**:
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -241,6 +254,7 @@ npm run build
 **Problem**: "Connection refused to http://localhost:11434"
 
 **Solution**:
+
 ```bash
 # Check if Ollama is running
 ollama list
@@ -261,6 +275,7 @@ brew services list
 **Problem**: "model 'mistral' not found"
 
 **Solution**:
+
 ```bash
 # List installed models
 ollama list
@@ -277,6 +292,7 @@ ollama list
 **Problem**: "Request to Ollama timed out"
 
 **Solution**:
+
 1. Check Ollama is running: `ollama list`
 2. Test connection: `curl http://localhost:11434/api/version`
 3. Check OLLAMA_BASE_URL environment variable
@@ -287,6 +303,7 @@ ollama list
 **Problem**: "Ollama not using GPU / slow inference"
 
 **Solution**:
+
 ```bash
 # Check CUDA availability
 nvidia-smi
@@ -303,6 +320,7 @@ nvidia-smi
 **Problem**: "Document analysis takes too long"
 
 **Solution**:
+
 1. Use a smaller/faster model: `ollama pull phi`
 2. Reduce max_tokens in code
 3. Use GPU acceleration if available
@@ -315,6 +333,7 @@ nvidia-smi
 **Problem**: "TesseractNotFoundError: tesseract is not installed"
 
 **Solution**:
+
 ```bash
 # Check installation
 tesseract --version
@@ -334,6 +353,7 @@ tesseract --version
 **Problem**: "TIFF upload succeeds but no text extracted"
 
 **Solution**:
+
 1. Check image quality (should be clear, high contrast)
 2. Ensure image is not inverted/rotated
 3. Try different TIFF file
@@ -344,6 +364,7 @@ tesseract --version
 **Problem**: "Extracted text is garbled or incorrect"
 
 **Solution**:
+
 1. Improve image quality
 2. Use higher DPI scans (300+ DPI recommended)
 3. Preprocess image (denoise, deskew, binarize)
@@ -357,6 +378,7 @@ tesseract --version
 **Problem**: "Invalid credentials" even with correct password
 
 **Solution**:
+
 1. Check `.env.local` has correct credentials
 2. Verify no extra spaces in username/password
 3. Check environment variables are loaded:
@@ -371,6 +393,7 @@ tesseract --version
 **Problem**: "Infinite redirect loop"
 
 **Solution**:
+
 1. Clear browser cookies
 2. Check NEXTAUTH_URL is correct
 3. Ensure SessionProvider wraps the app
@@ -382,6 +405,7 @@ tesseract --version
 **Problem**: "Error: Callback URL not allowed"
 
 **Solution**:
+
 ```typescript
 // In NextAuth config, add:
 callbacks: {
@@ -398,6 +422,7 @@ callbacks: {
 **Problem**: "database is locked"
 
 **Solution**:
+
 ```bash
 # SQLite doesn't handle concurrent writes well
 # Wait and retry
@@ -408,7 +433,7 @@ ps aux | grep python
 kill <PID>
 
 # Delete database and recreate
-rm backend/documents.db
+rm backend/api/v1/documents.db
 # Restart backend (will recreate)
 ```
 
@@ -417,9 +442,10 @@ rm backend/documents.db
 **Problem**: "Table already exists"
 
 **Solution**:
+
 ```bash
 # Drop and recreate database
-rm backend/documents.db
+rm backend/api/v1/documents.db
 
 # Or use Alembic for proper migrations
 pip install alembic
@@ -433,10 +459,11 @@ alembic upgrade head
 **Problem**: "Permission denied" when deleting documents.db
 
 **Solution**:
+
 ```bash
 # Stop backend server first
 # Then delete
-rm backend/documents.db
+rm backend/api/v1/documents.db
 
 # Windows: Check if file is locked
 # Use Process Explorer or restart
@@ -451,11 +478,13 @@ rm backend/documents.db
 **Causes and Solutions**:
 
 1. **LLM inference is slow**:
+
    - Use faster model: `ollama pull phi`
    - Reduce max_tokens
    - Use GPU acceleration
 
 2. **Large file size**:
+
    - Limit file size on frontend
    - Compress PDFs before upload
 
@@ -469,6 +498,7 @@ rm backend/documents.db
 **Problem**: "UI lags or freezes"
 
 **Solution**:
+
 1. Check browser console for errors
 2. Clear browser cache
 3. Disable browser extensions
@@ -482,11 +512,13 @@ rm backend/documents.db
 **Solution**:
 
 **Backend**:
+
 - Close database sessions properly
 - Don't load full document text when not needed
 - Use pagination for large lists
 
 **Ollama**:
+
 - Use smaller models
 - Adjust Ollama memory settings
 - Restart Ollama periodically
@@ -498,6 +530,7 @@ rm backend/documents.db
 **Problem**: "Access to fetch at 'http://localhost:8000' from origin 'http://localhost:3000' has been blocked by CORS policy"
 
 **Solution**:
+
 ```python
 # In backend/app/main.py, ensure frontend origin is allowed
 origins = [
@@ -513,6 +546,7 @@ origins = [
 **Problem**: "OPTIONS request returns 404"
 
 **Solution**:
+
 ```python
 # Ensure CORS middleware is added
 app.add_middleware(
@@ -533,14 +567,17 @@ app.add_middleware(
 **Possible Causes**:
 
 1. **File too large**:
+
    - Check backend accepts large files
    - Increase client timeout
 
 2. **Wrong file type**:
+
    - Ensure file is PDF or TIFF
    - Check file extension
 
 3. **Backend not running**:
+
    - Verify backend is running on port 8000
 
 4. **CORS issue**:
@@ -551,6 +588,7 @@ app.add_middleware(
 **Problem**: "No text extracted from PDF"
 
 **Solution**:
+
 - PDF might be scanned image (use OCR)
 - PDF might be encrypted/protected
 - Try different PDF file
@@ -561,15 +599,17 @@ app.add_middleware(
 ### Enable Debug Logging
 
 **Backend**:
+
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
 
 **Frontend**:
+
 ```typescript
 // Add console.log statements
-console.log('Debug:', variable)
+console.log("Debug:", variable);
 ```
 
 ### Check Versions

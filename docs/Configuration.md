@@ -13,6 +13,7 @@ The application can be configured through environment variables for both fronten
 **Location**: `frontend/.env.local`
 
 **Example** (`frontend/.env.example`):
+
 ```env
 # NextAuth Configuration
 NEXTAUTH_SECRET=your-secret-key-here
@@ -32,11 +33,13 @@ NEXTAUTH_ADMIN_PASSWORD=admin123
 **Default**: None
 
 **How to generate**:
+
 ```bash
 openssl rand -base64 32
 ```
 
 **Example**:
+
 ```env
 NEXTAUTH_SECRET=AyKPvHh7Dp8QaP5Y4FNYhKrG3fW5vJ2wL6KHxT1A2Zc=
 ```
@@ -48,11 +51,13 @@ NEXTAUTH_SECRET=AyKPvHh7Dp8QaP5Y4FNYhKrG3fW5vJ2wL6KHxT1A2Zc=
 **Default**: http://localhost:3000
 
 **Development**:
+
 ```env
 NEXTAUTH_URL=http://localhost:3000
 ```
 
 **Production**:
+
 ```env
 NEXTAUTH_URL=https://your-app.com
 ```
@@ -64,6 +69,7 @@ NEXTAUTH_URL=https://your-app.com
 **Default**: `admin`
 
 **Example**:
+
 ```env
 NEXTAUTH_ADMIN_USERNAME=superadmin
 ```
@@ -77,6 +83,7 @@ NEXTAUTH_ADMIN_USERNAME=superadmin
 **Security Note**: Always change this in production!
 
 **Example**:
+
 ```env
 NEXTAUTH_ADMIN_PASSWORD=MySecurePassword123!
 ```
@@ -104,6 +111,7 @@ The backend can be configured via environment variables or by setting them in yo
 **Default**: `http://localhost:11434`
 
 **Usage**:
+
 ```bash
 # Linux/macOS
 export OLLAMA_BASE_URL=http://localhost:11434
@@ -116,6 +124,7 @@ $env:OLLAMA_BASE_URL="http://localhost:11434"
 ```
 
 **Remote Ollama**:
+
 ```bash
 export OLLAMA_BASE_URL=http://192.168.1.100:11434
 ```
@@ -127,11 +136,13 @@ export OLLAMA_BASE_URL=http://192.168.1.100:11434
 **Default**: `mistral`
 
 **Usage**:
+
 ```bash
 export OLLAMA_MODEL=mistral
 ```
 
 **Other Models**:
+
 ```bash
 # Llama 2
 export OLLAMA_MODEL=llama2
@@ -144,6 +155,7 @@ export OLLAMA_MODEL=phi
 ```
 
 **Note**: Pull the model first:
+
 ```bash
 ollama pull mistral
 ollama pull llama2
@@ -162,6 +174,7 @@ OLLAMA_MODEL=mistral
 ```
 
 **Load with python-dotenv**:
+
 ```python
 from dotenv import load_dotenv
 load_dotenv()
@@ -171,7 +184,7 @@ load_dotenv()
 
 ### SQLite Database
 
-**Location**: `backend/documents.db`
+**Location**: `backend/api/v1/documents.db`
 
 **Auto-created**: Yes (on first run)
 
@@ -190,16 +203,19 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./your-custom-path.db"
 For production, consider PostgreSQL:
 
 1. **Install PostgreSQL driver**:
+
 ```bash
 pip install psycopg2-binary
 ```
 
 2. **Update database URL**:
+
 ```python
 SQLALCHEMY_DATABASE_URL = "postgresql://user:password@localhost/dbname"
 ```
 
 3. **Environment variable**:
+
 ```bash
 export DATABASE_URL=postgresql://user:password@localhost/dbname
 ```
@@ -211,6 +227,7 @@ export DATABASE_URL=postgresql://user:password@localhost/dbname
 **Download**: https://ollama.ai/
 
 **Verify Installation**:
+
 ```bash
 ollama --version
 ```
@@ -237,6 +254,7 @@ ollama list
 Ollama typically runs as a background service automatically.
 
 **Check Status**:
+
 ```bash
 # Linux
 systemctl status ollama
@@ -255,7 +273,8 @@ ollama serve
 
 ### Ollama Configuration File
 
-**Location**: 
+**Location**:
+
 - Linux: `~/.ollama/`
 - macOS: `~/.ollama/`
 - Windows: `%USERPROFILE%\.ollama\`
@@ -283,6 +302,7 @@ Create `~/.ollama/config.json`:
 3. Add to PATH: `C:\Program Files\Tesseract-OCR`
 
 **Verify**:
+
 ```bash
 tesseract --version
 ```
@@ -327,6 +347,7 @@ sudo apt-get install tesseract-ocr-spa  # Spanish
 ```
 
 **Usage**:
+
 ```python
 text = pytesseract.image_to_string(image, lang='fra')
 ```
@@ -375,6 +396,7 @@ origins = origins_str.split(",")
 ```
 
 Then set:
+
 ```bash
 export CORS_ORIGINS="http://localhost:3000,https://your-app.com"
 ```
@@ -388,6 +410,7 @@ export CORS_ORIGINS="http://localhost:3000,https://your-app.com"
 **Default**: 8000
 
 **Change Port**:
+
 ```bash
 uvicorn app.main:app --port 8080
 ```
@@ -397,6 +420,7 @@ uvicorn app.main:app --port 8080
 **Default**: 127.0.0.1 (localhost only)
 
 **Allow External Access**:
+
 ```bash
 uvicorn app.main:app --host 0.0.0.0
 ```
@@ -404,11 +428,13 @@ uvicorn app.main:app --host 0.0.0.0
 #### Workers
 
 **Development** (single worker with reload):
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
 **Production** (multiple workers):
+
 ```bash
 uvicorn app.main:app --workers 4
 ```
@@ -430,11 +456,13 @@ uvicorn app.main:app \
 **Default**: 3000
 
 **Change Port**:
+
 ```bash
 npm run dev -- -p 3001
 ```
 
 Or set in `package.json`:
+
 ```json
 {
   "scripts": {
@@ -616,7 +644,7 @@ CMD ["npm", "start"]
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -676,6 +704,7 @@ services:
 ### "Module not found" errors
 
 **Solution**: Ensure all dependencies are installed
+
 ```bash
 cd backend && pip install -e .
 cd frontend && npm install
@@ -683,7 +712,8 @@ cd frontend && npm install
 
 ### "Ollama connection refused"
 
-**Solution**: 
+**Solution**:
+
 1. Check Ollama is running: `ollama list`
 2. Verify OLLAMA_BASE_URL is correct
 3. Test connection: `curl http://localhost:11434/api/version`
@@ -691,6 +721,7 @@ cd frontend && npm install
 ### "Tesseract not found"
 
 **Solution**:
+
 1. Verify installation: `tesseract --version`
 2. Add to PATH or set `tesseract_cmd` in code
 3. Restart terminal/IDE after installation
@@ -698,6 +729,7 @@ cd frontend && npm install
 ### Frontend can't reach backend
 
 **Solution**:
+
 1. Check backend is running on port 8000
 2. Verify CORS settings allow frontend origin
 3. Check firewall isn't blocking connection

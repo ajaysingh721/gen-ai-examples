@@ -43,7 +43,7 @@ export default function HomePage() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="secondary">
-              <Link href="/documents">View recent</Link>
+              <Link href="/api/v1/documents">View recent</Link>
             </Button>
           </CardContent>
         </Card>

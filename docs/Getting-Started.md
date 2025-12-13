@@ -9,14 +9,17 @@ Before you begin, ensure you have the following installed:
 ### Required Software
 
 1. **Python 3.12+**
+
    - Download from [python.org](https://www.python.org/downloads/)
    - Verify installation: `python --version`
 
 2. **Node.js** (Current LTS recommended)
+
    - Download from [nodejs.org](https://nodejs.org/)
    - Verify installation: `node --version` and `npm --version`
 
 3. **Ollama** (for local LLM)
+
    - Install from [ollama.ai](https://ollama.ai/)
    - Must be running at `http://localhost:11434`
    - Pull the Mistral model: `ollama pull mistral`
@@ -54,12 +57,14 @@ cd backend
 #### Create Virtual Environment
 
 **Windows:**
+
 ```bash
 python -m venv .venv
 .\.venv\Scripts\activate
 ```
 
 **macOS/Linux:**
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
@@ -72,6 +77,7 @@ pip install -e .
 ```
 
 This will install all required packages including:
+
 - FastAPI
 - Uvicorn
 - SQLAlchemy
@@ -88,6 +94,7 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 The backend will be available at:
+
 - **API**: http://127.0.0.1:8000
 - **Swagger UI**: http://127.0.0.1:8000/docs
 - **ReDoc**: http://127.0.0.1:8000/redoc
@@ -107,6 +114,7 @@ npm install
 ```
 
 This will install all required packages including:
+
 - Next.js 16
 - NextAuth
 - React 19
@@ -123,6 +131,7 @@ cp .env.example .env.local
 ```
 
 Edit `.env.local` to customize:
+
 ```env
 NEXTAUTH_SECRET=your-secret-key-here
 NEXTAUTH_ADMIN_USERNAME=admin
@@ -169,13 +178,15 @@ The frontend will be available at: http://localhost:3000
 ## Database
 
 The SQLite database is automatically created at:
+
 ```
-backend/documents.db
+backend/api/v1/documents.db
 ```
 
 You can view/query it using:
+
 - SQLite Browser
-- Command line: `sqlite3 backend/documents.db`
+- Command line: `sqlite3 backend/api/v1/documents.db`
 - Python SQLAlchemy queries
 
 ## Next Steps
@@ -190,6 +201,7 @@ You can view/query it using:
 ### Start Everything
 
 **Terminal 1 (Backend):**
+
 ```bash
 cd backend
 .\.venv\Scripts\activate  # or source .venv/bin/activate
@@ -197,17 +209,20 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 **Terminal 2 (Ollama - if not running as service):**
+
 ```bash
 ollama serve
 ```
 
 **Terminal 3 (Frontend):**
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 **Verify all services are running:**
+
 - Backend: http://127.0.0.1:8000/docs should load
 - Ollama: `ollama list` should work
 - Frontend: http://localhost:3000 should load

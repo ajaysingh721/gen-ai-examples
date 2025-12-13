@@ -5,8 +5,8 @@ A full-stack example app that uploads clinical documents (PDF/TIFF), extracts te
 ## What’s included
 
 - **Backend**: FastAPI + SQLAlchemy + SQLite
-  - `POST /documents/analyze`: upload a PDF/TIFF and get `{ type, summary, text_length }`
-  - `GET /documents?limit=20`: list recent analyses
+  - `POST /api/v1/documents/analyze`: upload a PDF/TIFF and get `{ type, summary, text_length }`
+  - `GET /api/v1/documents?limit=20`: list recent analyses
   - Local LLM via **Ollama** (`OLLAMA_MODEL` defaults to `mistral`)
   - TIFF OCR via **Tesseract** (`pytesseract`)
 - **Frontend**: Next.js (App Router) + NextAuth (Credentials) + shadcn/ui
@@ -43,7 +43,7 @@ uvicorn app.main:app --reload --port 8000
 - `OLLAMA_BASE_URL` (default `http://localhost:11434`)
 - `OLLAMA_MODEL` (default `mistral`)
 
-SQLite DB file is created at `backend/documents.db`.
+SQLite DB file is created at `backend/api/v1/documents.db`.
 
 ### 2) Frontend (Next.js)
 
@@ -73,7 +73,7 @@ NEXTAUTH_ADMIN_PASSWORD=admin123
 
 ## Notes
 
-- The upload page currently calls the backend at `http://localhost:8000/documents/analyze`.
+- The upload page currently calls the backend at `http://localhost:8000/api/v1/documents/analyze`.
 - If OCR isn’t installed/configured, PDF uploads still work, but TIFF uploads will fail.
 
 ## Documentation

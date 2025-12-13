@@ -3,7 +3,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from app.schemas.document import DocumentAnalysisResponse, DocumentRecord, DocumentType
 from app.services import document_service
 
-router = APIRouter(prefix="/documents", tags=["documents"])
+router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
 
 @router.post("/analyze", response_model=DocumentAnalysisResponse)
