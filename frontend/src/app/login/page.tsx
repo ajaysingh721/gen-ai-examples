@@ -84,7 +84,7 @@ function LoginForm() {
                     <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="admin"
+                        placeholder="Please enter your username"
                         autoComplete="username"
                         {...field}
                       />
