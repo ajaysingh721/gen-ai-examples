@@ -66,7 +66,7 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Admin Login</CardTitle>
+          <CardTitle>Login</CardTitle>
           <CardDescription>
             Sign in with the admin username and password to access the document
             analyzer.
