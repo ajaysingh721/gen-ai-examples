@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk";
@@ -24,6 +24,7 @@ export default function Home() {
   const [documents, setDocuments] = useState<DocumentAnalysisResponse[] | null>(
     null,
   );
+  const [navCollapsed, setNavCollapsed] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -157,18 +158,79 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-2xl rounded-xl bg-white shadow-sm border border-zinc-200 p-6 space-y-6">
-        <header className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Clinical Document Analyzer
-          </h1>
-          <p className="text-sm text-zinc-500">
-            Upload a PDF or TIFF discharge summary, inpatient note, or census
-            file. The backend will classify the document type and generate a
-            concise summary using a local LLM.
-          </p>
-        </header>
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex">
+      <aside
+        className={`hidden md:flex flex-col border-r border-zinc-200 bg-white/80 backdrop-blur-sm px-3 py-4 gap-4 transition-all duration-200 ${navCollapsed ? "w-16" : "w-64"}`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          {!navCollapsed && (
+            <div className="space-y-1">
+              <h1 className="text-sm font-semibold tracking-tight">
+                Clinical Console
+              </h1>
+              <p className="text-[11px] text-zinc-500">
+                Admin tools for document analysis.
+              </p>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setNavCollapsed((prev) => !prev)}
+            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-300 bg-white text-[11px] text-zinc-700 shadow-sm hover:bg-zinc-50"
+            aria-label={navCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {navCollapsed ? ">" : "<"}
+          </button>
+        </div>
+        <nav className="flex-1 space-y-1 text-sm mt-1">
+          <div className="flex items-center gap-2 rounded-md bg-zinc-900 text-zinc-50 px-3 py-2 font-medium text-xs">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+            {!navCollapsed && <span>Dashboard</span>}
+          </div>
+          <button
+            type="button"
+            className="w-full text-left rounded-md px-3 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs flex items-center gap-2"
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400" />
+            {!navCollapsed && <span>Upload & summarize</span>}
+          </button>
+          <button
+            type="button"
+            className="w-full text-left rounded-md px-3 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs flex items-center gap-2"
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400" />
+            {!navCollapsed && <span>Recent documents</span>}
+          </button>
+          <button
+            type="button"
+            className="w-full text-left rounded-md px-3 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs flex items-center gap-2"
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400" />
+            {!navCollapsed && <span>Settings (coming soon)</span>}
+          </button>
+        </nav>
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="mt-auto inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-[11px] font-medium text-zinc-700 shadow-sm hover:bg-zinc-50"
+        >
+          {!navCollapsed && <span>Sign out</span>}
+          {navCollapsed && <span>⏏</span>}
+        </button>
+      </aside>
+
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-2xl rounded-xl bg-white shadow-sm border border-zinc-200 p-6 space-y-6">
+          <header className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Clinical Document Analyzer
+            </h1>
+            <p className="text-sm text-zinc-500">
+              Upload a PDF or TIFF discharge summary, inpatient note, or
+              census file. The backend will classify the document type and
+              generate a concise summary using a local LLM.
+            </p>
+          </header>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -264,6 +326,7 @@ export default function Home() {
             </ul>
           </section>
         )}
+        </div>
       </div>
     </div>
   );
