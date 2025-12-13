@@ -56,3 +56,12 @@ async def list_documents(limit: int = 20) -> list[DocumentRecord]:
     """
 
     return document_service.list_recent_documents(limit=limit)
+
+
+@router.delete("/{doc_id}")
+async def delete_document(doc_id: int) -> dict:
+    deleted = document_service.delete_document_analysis(doc_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    return {"ok": True}
