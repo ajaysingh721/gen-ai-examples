@@ -1,22 +1,33 @@
 from functools import lru_cache
+import os
 
-from transformers import pipeline
+from ollama import Client
 
 
 @lru_cache(maxsize=1)
-def get_llm_pipeline():
-    """Return a cached local text-generation pipeline.
+def get_ollama_client() -> Client:
+    """Return a cached Ollama client instance.
 
-    Uses a small model by default so it can run on CPU.
-    The first call will download the model; later calls reuse it.
+    Assumes the Ollama server is running locally (default http://localhost:11434)
+    and that the desired model (for example, "mistral") is already pulled.
     """
 
-    # You can replace "distilgpt2" with another local or downloaded model.
-    return pipeline("text-generation", model="distilgpt2")
+    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    return Client(host=base_url)
 
 
 def generate_text(prompt: str, max_tokens: int = 128) -> str:
-    pipe = get_llm_pipeline()
+    """Generate text using a local Ollama model (e.g. mistral)."""
 
-    outputs = pipe(prompt, max_new_tokens=max_tokens, do_sample=True, temperature=0.7)
-    return outputs[0]["generated_text"]
+    client = get_ollama_client()
+
+    model_name = os.environ.get("OLLAMA_MODEL", "mistral")
+
+    response = client.chat(
+        model=model_name,
+        messages=[{"role": "user", "content": prompt}],
+        options={"num_predict": max_tokens},
+    )
+
+    # Ollama chat returns a dict with a "message" field
+    return response["message"]["content"]

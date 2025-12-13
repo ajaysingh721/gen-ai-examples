@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { FileText, History, LayoutDashboard, Settings, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk";
 
@@ -19,6 +20,9 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadPhase, setUploadPhase] = useState<"uploading" | "analyzing" | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DocumentAnalysisResponse | null>(null);
   const [documents, setDocuments] = useState<DocumentAnalysisResponse[] | null>(
@@ -68,6 +72,7 @@ export default function Home() {
     try {
       setLoading(true);
       setUploadProgress(0);
+      setUploadPhase("uploading");
 
       const formData = new FormData();
       formData.append("file", file);
@@ -86,9 +91,17 @@ export default function Home() {
             }
           };
 
+          xhr.upload.onload = () => {
+            // Upload finished; switch to analyzing phase and bump progress
+            setUploadPhase("analyzing");
+            setUploadProgress((prev) => {
+              if (prev === null) return 90;
+              return prev < 90 ? 90 : prev;
+            });
+          };
+
           xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-              setUploadProgress(null);
               if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                   const data = JSON.parse(xhr.responseText);
@@ -112,7 +125,6 @@ export default function Home() {
           };
 
           xhr.onerror = () => {
-            setUploadProgress(null);
             reject(new Error("Network error"));
           };
 
@@ -141,6 +153,8 @@ export default function Home() {
       setError(err.message ?? "Unexpected error");
     } finally {
       setLoading(false);
+      setUploadPhase(null);
+      setUploadProgress(null);
     }
   };
 
@@ -160,7 +174,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 flex">
       <aside
-        className={`hidden md:flex flex-col border-r border-zinc-200 bg-white/80 backdrop-blur-sm px-3 py-4 gap-4 transition-all duration-200 ${navCollapsed ? "w-16" : "w-64"}`}
+        className={`relative hidden md:flex flex-col border-r border-zinc-200 bg-white/80 backdrop-blur-sm px-3 py-4 gap-4 transition-all duration-200 ${navCollapsed ? "w-16" : "w-64"}`}
       >
         <div className="flex items-center justify-between gap-2">
           {!navCollapsed && (
@@ -173,39 +187,31 @@ export default function Home() {
               </p>
             </div>
           )}
-          <button
-            type="button"
-            onClick={() => setNavCollapsed((prev) => !prev)}
-            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-300 bg-white text-[11px] text-zinc-700 shadow-sm hover:bg-zinc-50"
-            aria-label={navCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {navCollapsed ? ">" : "<"}
-          </button>
         </div>
         <nav className="flex-1 space-y-1 text-sm mt-1">
           <div className="flex items-center gap-2 rounded-md bg-zinc-900 text-zinc-50 px-3 py-2 font-medium text-xs">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+            <LayoutDashboard className="h-4 w-4" />
             {!navCollapsed && <span>Dashboard</span>}
           </div>
           <button
             type="button"
             className="w-full text-left rounded-md px-3 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs flex items-center gap-2"
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400" />
+            <FileText className="h-3.5 w-3.5" />
             {!navCollapsed && <span>Upload & summarize</span>}
           </button>
           <button
             type="button"
             className="w-full text-left rounded-md px-3 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs flex items-center gap-2"
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400" />
+            <History className="h-3.5 w-3.5" />
             {!navCollapsed && <span>Recent documents</span>}
           </button>
           <button
             type="button"
             className="w-full text-left rounded-md px-3 py-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs flex items-center gap-2"
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400" />
+            <Settings className="h-3.5 w-3.5" />
             {!navCollapsed && <span>Settings (coming soon)</span>}
           </button>
         </nav>
@@ -214,8 +220,21 @@ export default function Home() {
           onClick={() => signOut({ callbackUrl: "/login" })}
           className="mt-auto inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-[11px] font-medium text-zinc-700 shadow-sm hover:bg-zinc-50"
         >
-          {!navCollapsed && <span>Sign out</span>}
-          {navCollapsed && <span>⏏</span>}
+          <LogOut className="h-3.5 w-3.5" />
+          {!navCollapsed && <span className="ml-1.5">Sign out</span>}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setNavCollapsed((prev) => !prev)}
+          className="absolute top-1/2 -right-3 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-300 bg-white text-[11px] text-zinc-700 shadow-sm hover:bg-zinc-50"
+          aria-label={navCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {navCollapsed ? (
+            <PanelLeftOpen className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
         </button>
       </aside>
 
@@ -256,7 +275,11 @@ export default function Home() {
           {uploadProgress !== null && (
             <div className="space-y-1">
               <div className="flex justify-between text-xs text-zinc-600">
-                <span>Upload progress</span>
+                <span>
+                  {uploadPhase === "analyzing"
+                    ? "Analyzing document"
+                    : "Upload progress"}
+                </span>
                 <span>{uploadProgress}%</span>
               </div>
               <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">

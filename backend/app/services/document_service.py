@@ -32,28 +32,53 @@ def extract_text_from_tiff(file_obj: BinaryIO) -> str:
 
 
 def classify_document_type(text: str) -> DocumentType:
+    """Use the LLM to decide what kind of document this is.
+
+    Categories:
+      - discharge_summary
+      - inpatient_document
+      - census
+      - junk
+    """
+
     cleaned = text.strip()
     if not cleaned or len(cleaned) < 100:
         return DocumentType.junk
 
-    lowered = cleaned.lower()
+    # Limit the length sent to the LLM for classification
+    snippet = cleaned[:4000]
 
-    if "discharge summary" in lowered or "discharge diagnosis" in lowered:
+    prompt = (
+        "You are a clinical documentation classifier. "
+        "Given the following clinical or administrative document, "
+        "decide which ONE of the following categories it belongs to:\n\n"
+        "- discharge_summary: a discharge summary for a patient leaving the hospital\n"
+        "- inpatient_document: any inpatient progress note, H&P, consult, or other in-hospital documentation\n"
+        "- census: a list or table of patients, often with bed numbers, units, or service names\n"
+        "- junk: anything that is not a meaningful clinical or census document (e.g., scanning errors, noise, empty content)\n\n"
+        "Respond with only one word from: discharge_summary, inpatient_document, census, junk.\n\n"
+        f"Document:\n{snippet}\n\nCategory:"
+    )
+
+    raw = generate_text(prompt, max_tokens=8).strip().lower()
+
+    # Normalize and map model output to our enum
+    if "discharge" in raw:
         return DocumentType.discharge_summary
-
-    if any(kw in lowered for kw in [
-        "hospital day",
-        "progress note",
-        "admission date",
-        "discharge date",
-        "inpatient",
-    ]):
+    if "inpatient" in raw or "progress" in raw or "note" in raw:
         return DocumentType.inpatient_document
-
-    if "census" in lowered:
+    if "census" in raw:
         return DocumentType.census
+    if "junk" in raw:
+        return DocumentType.junk
 
-    # Default to inpatient-style clinical document if it looks substantial
+    # Fallback heuristic if LLM output is unclear
+    if len(cleaned) < 150:
+        return DocumentType.junk
+    if "discharge" in cleaned.lower():
+        return DocumentType.discharge_summary
+    if "census" in cleaned.lower():
+        return DocumentType.census
     if len(cleaned) > 300:
         return DocumentType.inpatient_document
 
