@@ -1,6 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk";
 
@@ -10,8 +25,21 @@ type DocumentAnalysisResponse = {
   text_length: number;
 };
 
+const formSchema = z.object({
+  file: z
+    .custom<File>((value) => value instanceof File, {
+      message: "Please select a PDF or TIFF file.",
+    })
+    .refine(
+      (file) => {
+        const name = file?.name?.toLowerCase?.() ?? "";
+        return name.endsWith(".pdf") || name.endsWith(".tif") || name.endsWith(".tiff");
+      },
+      { message: "Supported types: PDF, TIFF." },
+    ),
+});
+
 export default function UploadSummarizePage() {
-  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadPhase, setUploadPhase] = useState<
@@ -20,15 +48,16 @@ export default function UploadSummarizePage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DocumentAnalysisResponse | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      file: undefined as any,
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setError(null);
     setResult(null);
-
-    if (!file) {
-      setError("Please select a PDF or TIFF file.");
-      return;
-    }
 
     try {
       setLoading(true);
@@ -36,7 +65,7 @@ export default function UploadSummarizePage() {
       setUploadPhase("uploading");
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", values.file);
 
       const response: DocumentAnalysisResponse = await new Promise(
         (resolve, reject) => {
@@ -90,7 +119,9 @@ export default function UploadSummarizePage() {
 
       setResult(response);
     } catch (err: any) {
-      setError(err.message ?? "Unexpected error");
+      const message = err?.message ?? "Unexpected error";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
       setUploadPhase(null);
@@ -110,24 +141,34 @@ export default function UploadSummarizePage() {
         </p>
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-700">
-            Document file
-          </label>
-          <input
-            type="file"
-            accept=".pdf,.tif,.tiff,application/pdf,image/tiff"
-            onChange={(e) => {
-              const selected = e.target.files?.[0] ?? null;
-              setFile(selected);
-              setResult(null);
-              setError(null);
-            }}
-            className="block w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="file"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Document file</FormLabel>
+                <FormControl>
+                  <input
+                    type="file"
+                    accept=".pdf,.tif,.tiff,application/pdf,image/tiff"
+                    onChange={(e) => {
+                      const selected = e.target.files?.[0] ?? null;
+                      field.onChange(selected);
+                      setResult(null);
+                      setError(null);
+                    }}
+                    className="block w-full rounded-md border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                  />
+                </FormControl>
+                <FormDescription className="text-xs">
+                  Supported types: PDF, TIFF.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <p className="text-xs text-zinc-500">Supported types: PDF, TIFF.</p>
-        </div>
 
         {uploadProgress !== null && (
           <div className="space-y-1">
@@ -148,14 +189,14 @@ export default function UploadSummarizePage() {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
-        >
-          {loading ? "Analyzing…" : "Analyze document"}
-        </button>
-      </form>
+          <Button
+            type="submit"
+            disabled={loading || form.formState.isSubmitting}
+          >
+            {loading ? "Analyzing…" : "Analyze document"}
+          </Button>
+        </form>
+      </Form>
 
       {error && (
         <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
