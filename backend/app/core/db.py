@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+# Store SQLite file in the backend folder
 SQLALCHEMY_DATABASE_URL = "sqlite:///./documents.db"
 
 engine = create_engine(

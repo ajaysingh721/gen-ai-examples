@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.schemas.document import DocumentAnalysisResponse, DocumentType
+from app.schemas.document import DocumentAnalysisResponse, DocumentRecord, DocumentType
 from app.services import document_service
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -46,3 +46,13 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
         summary=summary,
         text_length=len(text),
     )
+
+
+@router.get("/", response_model=list[DocumentRecord])
+async def list_documents(limit: int = 20) -> list[DocumentRecord]:
+    """List recently analyzed documents.
+
+    Results are ordered from newest to oldest.
+    """
+
+    return document_service.list_recent_documents(limit=limit)

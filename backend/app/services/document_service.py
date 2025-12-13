@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import SessionLocal
 from app.models.document_analysis import DocumentAnalysis
-from app.schemas.document import DocumentType
+from app.schemas.document import DocumentType, DocumentRecord
 from app.services.llm_service import generate_text
 
 
@@ -96,5 +96,31 @@ def persist_document_analysis(
         db.commit()
         db.refresh(obj)
         return obj
+    finally:
+        db.close()
+
+
+def list_recent_documents(limit: int = 20) -> list[DocumentRecord]:
+    """Return the most recent document analyses from the database."""
+
+    db: Session = SessionLocal()
+    try:
+        query = (
+            db.query(DocumentAnalysis)
+            .order_by(DocumentAnalysis.created_at.desc())
+            .limit(limit)
+        )
+        items = query.all()
+        return [
+            DocumentRecord(
+                id=item.id,
+                filename=item.filename,
+                doc_type=DocumentType(item.doc_type),
+                summary=item.summary,
+                text_length=item.text_length,
+                created_at=item.created_at,
+            )
+            for item in items
+        ]
     finally:
         db.close()

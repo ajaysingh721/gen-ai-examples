@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk";
 
@@ -11,10 +13,46 @@ type DocumentAnalysisResponse = {
 };
 
 export default function Home() {
+  const { status } = useSession();
+  const router = useRouter();
+
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DocumentAnalysisResponse | null>(null);
+  const [documents, setDocuments] = useState<DocumentAnalysisResponse[] | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const fetchDocuments = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/documents?limit=20");
+        if (!res.ok) return;
+        const data = (await res.json()) as any[];
+        setDocuments(
+          data.map((d) => ({
+            type: d.doc_type as DocumentType,
+            summary: d.summary,
+            text_length: d.text_length,
+          })),
+        );
+      } catch {
+        // ignore listing errors for now
+      }
+    };
+
+    fetchDocuments();
+  }, [status]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -26,29 +64,97 @@ export default function Home() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8000/documents/analyze", {
-        method: "POST",
-        body: formData,
-      });
+      setUploadProgress(0);
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.detail ?? "Failed to analyze document.");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response: DocumentAnalysisResponse = await new Promise(
+        (resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "http://localhost:8000/documents/analyze");
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percent = Math.round(
+                (event.loaded / event.total) * 100,
+              );
+              setUploadProgress(percent);
+            }
+          };
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+              setUploadProgress(null);
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  const data = JSON.parse(xhr.responseText);
+                  resolve(data as DocumentAnalysisResponse);
+                } catch (e) {
+                  reject(new Error("Invalid response from server."));
+                }
+              } else {
+                try {
+                  const data = JSON.parse(xhr.responseText);
+                  reject(
+                    new Error(
+                      data?.detail ?? "Failed to analyze document.",
+                    ),
+                  );
+                } catch (e) {
+                  reject(new Error("Failed to analyze document."));
+                }
+              }
+            }
+          };
+
+          xhr.onerror = () => {
+            setUploadProgress(null);
+            reject(new Error("Network error"));
+          };
+
+          xhr.send(formData);
+        },
+      );
+
+      setResult(response);
+      // Refresh document list after successful upload
+      try {
+        const res = await fetch("http://localhost:8000/documents?limit=20");
+        if (res.ok) {
+          const docs = (await res.json()) as any[];
+          setDocuments(
+            docs.map((d) => ({
+              type: d.doc_type as DocumentType,
+              summary: d.summary,
+              text_length: d.text_length,
+            })),
+          );
+        }
+      } catch {
+        // ignore listing errors
       }
-
-      const data: DocumentAnalysisResponse = await response.json();
-      setResult(data);
     } catch (err: any) {
       setError(err.message ?? "Unexpected error");
     } finally {
       setLoading(false);
     }
   };
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <p className="text-sm text-zinc-500">Loading session…</p>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    // Redirect handled in useEffect; render nothing to avoid flicker
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 flex items-center justify-center px-4 py-8">
@@ -85,6 +191,21 @@ export default function Home() {
             </p>
           </div>
 
+          {uploadProgress !== null && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-zinc-600">
+                <span>Upload progress</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
+                <div
+                  className="h-full bg-black transition-all"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -118,6 +239,29 @@ export default function Home() {
                 {result.summary}
               </pre>
             </div>
+          </section>
+        )}
+
+        {documents && documents.length > 0 && (
+          <section className="space-y-2 border-t border-zinc-200 pt-4">
+            <h2 className="text-sm font-semibold text-zinc-800">
+              Recent documents
+            </h2>
+            <ul className="space-y-1 text-sm text-zinc-700 max-h-40 overflow-y-auto">
+              {documents.map((doc, index) => (
+                <li
+                  key={index}
+                  className="flex items-center justify-between rounded border border-zinc-200 bg-zinc-50 px-3 py-1.5"
+                >
+                  <span className="truncate max-w-xs">
+                    {doc.type.replace("_", " ")}
+                  </span>
+                  <span className="text-xs text-zinc-500">
+                    {doc.text_length} chars
+                  </span>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </div>
