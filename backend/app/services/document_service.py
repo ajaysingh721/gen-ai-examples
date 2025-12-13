@@ -149,3 +149,22 @@ def list_recent_documents(limit: int = 20) -> list[DocumentRecord]:
         ]
     finally:
         db.close()
+
+
+def delete_document_analysis(doc_id: int) -> bool:
+    """Delete a document analysis row by id.
+
+    Returns True if a row was deleted, False if it did not exist.
+    """
+
+    db: Session = SessionLocal()
+    try:
+        obj = db.query(DocumentAnalysis).filter(DocumentAnalysis.id == doc_id).first()
+        if not obj:
+            return False
+
+        db.delete(obj)
+        db.commit()
+        return True
+    finally:
+        db.close()

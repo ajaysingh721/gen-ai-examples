@@ -1,6 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Eye, Trash2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk";
 
@@ -17,6 +35,49 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [activeDoc, setActiveDoc] = useState<DocumentRecord | null>(null);
+
+  const handleViewSummary = (doc: DocumentRecord) => {
+    setActiveDoc(doc);
+    setSummaryOpen(true);
+  };
+
+  const handleAskDelete = (doc: DocumentRecord) => {
+    setActiveDoc(doc);
+    setDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!activeDoc) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/documents/${activeDoc.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let detail = "Failed to delete document.";
+        try {
+          const data = await res.json();
+          detail = data?.detail ?? detail;
+        } catch {
+          // ignore
+        }
+        toast.error(detail);
+        return;
+      }
+
+      setDocuments((prev) => prev.filter((d) => d.id !== activeDoc.id));
+      toast.success("Document deleted.");
+      setDeleteOpen(false);
+      setActiveDoc(null);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Unexpected error");
+    }
+  };
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -68,6 +129,7 @@ export default function DocumentsPage() {
 
       {documents.length > 0 && (
         <div className="overflow-x-auto">
+          <TooltipProvider>
           <table className="min-w-full text-sm text-left text-zinc-700">
             <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
               <tr>
@@ -75,6 +137,7 @@ export default function DocumentsPage() {
                 <th className="px-3 py-2">Type</th>
                 <th className="px-3 py-2">Characters</th>
                 <th className="px-3 py-2">Created at</th>
+                <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -93,12 +156,88 @@ export default function DocumentsPage() {
                   <td className="px-3 py-2 text-zinc-500">
                     {new Date(doc.created_at).toLocaleString()}
                   </td>
+                  <td className="px-3 py-2 text-right">
+                    <div className="inline-flex items-center gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon-sm"
+                            aria-label="View summary"
+                            onClick={() => handleViewSummary(doc)}
+                          >
+                            <Eye />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">View summary</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon-sm"
+                            aria-label="Delete document"
+                            onClick={() => handleAskDelete(doc)}
+                          >
+                            <Trash2 />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Delete</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </TooltipProvider>
         </div>
       )}
+
+      <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Summary</DialogTitle>
+            <DialogDescription>
+              {activeDoc?.filename ?? "Selected document"}
+            </DialogDescription>
+          </DialogHeader>
+          <pre className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
+            {activeDoc?.summary ?? ""}
+          </pre>
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => setSummaryOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete document?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove the selected document analysis from the database.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-md border p-3 text-sm">
+            <div className="font-medium">{activeDoc?.filename ?? ""}</div>
+            <div className="text-muted-foreground">ID: {activeDoc?.id ?? ""}</div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
