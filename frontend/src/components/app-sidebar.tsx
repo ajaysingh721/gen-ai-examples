@@ -29,7 +29,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isUpload = pathname?.startsWith("/upload");
-  const isDocuments = pathname?.startsWith("/api/v1/documents");
+  const isDocuments = pathname?.startsWith("/documents");
 
   return (
     <Sidebar collapsible="icon">
@@ -90,7 +90,7 @@ export function AppSidebar() {
                   isActive={!!isDocuments}
                   tooltip="Recent documents"
                 >
-                  <Link href="/api/v1/documents">
+                  <Link href="/documents">
                     <History />
                     <span>Recent documents</span>
                   </Link>
