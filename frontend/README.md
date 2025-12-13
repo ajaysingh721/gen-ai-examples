@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app) and configured with [shadcn/ui](https://ui.shadcn.com).
+This is the **frontend** for the Clinical Document Analyzer example app.
+
+- Next.js (App Router) + TypeScript
+- shadcn/ui + Tailwind CSS v4
+- NextAuth (Credentials + optional mock SSO)
 
 ## Getting Started
 
@@ -16,7 +20,23 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+### Routes
+
+- `/login` – login page (no sidebar)
+- `/upload` – upload and analyze a document
+- `/documents` – recent documents (view summary / delete)
+
+### Running tests
+
+```bash
+npm test
+```
+
+Watch mode:
+
+```bash
+npm run test:watch
+```
 
 This project uses Tailwind CSS v4 and shadcn/ui primitives for building UI components.
 

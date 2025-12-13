@@ -7,6 +7,7 @@ A full-stack example app that uploads clinical documents (PDF/TIFF), extracts te
 - **Backend**: FastAPI + SQLAlchemy + SQLite
   - `POST /api/v1/documents/analyze`: upload a PDF/TIFF and get `{ type, summary, text_length }`
   - `GET /api/v1/documents?limit=20`: list recent analyses
+  - `DELETE /api/v1/documents/{id}`: delete an analysis
   - Local LLM via **Ollama** (`OLLAMA_MODEL` defaults to `mistral`)
   - TIFF OCR via **Tesseract** (`pytesseract`)
 - **Frontend**: Next.js (App Router) + NextAuth (Credentials) + shadcn/ui
@@ -43,7 +44,21 @@ uvicorn app.main:app --reload --port 8000
 - `OLLAMA_BASE_URL` (default `http://localhost:11434`)
 - `OLLAMA_MODEL` (default `mistral`)
 
-SQLite DB file is created at `backend/api/v1/documents.db`.
+SQLite DB file is created at `backend/documents.db`.
+
+### 3) Frontend tests (Jest)
+
+From the repo root:
+
+```bash
+cd frontend
+npm test
+```
+
+Notes:
+
+- The Jest setup file is required by config: `frontend/jest.config.js` loads `frontend/jest.setup.ts` via `setupFilesAfterEnv`.
+- Watch mode: `npm run test:watch`
 
 ### 2) Frontend (Next.js)
 
@@ -70,6 +85,8 @@ You can override via environment variables in `frontend/.env.local` (start from 
 NEXTAUTH_ADMIN_USERNAME=admin
 NEXTAUTH_ADMIN_PASSWORD=admin123
 ```
+
+You should also set `NEXTAUTH_SECRET` in `frontend/.env.local` for stable auth sessions.
 
 ## Notes
 
