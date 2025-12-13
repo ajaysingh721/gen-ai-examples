@@ -76,8 +76,27 @@ NEXTAUTH_ADMIN_PASSWORD=admin123
 - The upload page currently calls the backend at `http://localhost:8000/documents/analyze`.
 - If OCR isn’t installed/configured, PDF uploads still work, but TIFF uploads will fail.
 
+## Documentation
+
+📚 **Comprehensive Wiki Documentation Available!**
+
+For detailed documentation, please visit the `wiki/` directory or set up the GitHub Wiki:
+
+- **[Home](wiki/Home.md)** - Overview and navigation
+- **[Getting Started](wiki/Getting-Started.md)** - Installation and setup guide
+- **[Backend Architecture](wiki/Backend-Architecture.md)** - FastAPI backend details
+- **[Frontend Architecture](wiki/Frontend-Architecture.md)** - Next.js frontend details
+- **[API Documentation](wiki/API-Documentation.md)** - Complete API reference
+- **[Authentication](wiki/Authentication.md)** - NextAuth configuration
+- **[Configuration](wiki/Configuration.md)** - Environment variables and settings
+- **[Troubleshooting](wiki/Troubleshooting.md)** - Common issues and solutions
+- **[Development Guide](wiki/Development-Guide.md)** - Development workflow and best practices
+
+See [wiki/README.md](wiki/README.md) for instructions on setting up the GitHub Wiki.
+
 ## Repo structure
 
 - `backend/` FastAPI API + OCR + Ollama + SQLite persistence
 - `frontend/` Next.js UI + login + sidebar
 - `docs/` documentation scratchpad
+- `wiki/` comprehensive wiki documentation
