@@ -9,4 +9,7 @@ dependencies = [
 	"uvicorn[standard]",
 	"transformers",
 	"torch",
+	"pypdf",
+	"pillow",
+	"pytesseract",
 ]
