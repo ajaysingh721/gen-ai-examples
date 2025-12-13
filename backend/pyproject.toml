@@ -12,4 +12,6 @@ dependencies = [
 	"pypdf",
 	"pillow",
 	"pytesseract",
+	"sqlalchemy",
+	"python-multipart",
 ]

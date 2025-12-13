@@ -33,6 +33,14 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
     else:
         summary = document_service.summarize_document(text)
 
+    # Persist analysis to SQLite
+    document_service.persist_document_analysis(
+        filename=filename,
+        text=text,
+        doc_type=doc_type,
+        summary=summary,
+    )
+
     return DocumentAnalysisResponse(
         type=doc_type,
         summary=summary,

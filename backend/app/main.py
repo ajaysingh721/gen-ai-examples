@@ -1,7 +1,29 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
+from app.core.db import Base, engine
 
 app = FastAPI(title="Backend API", version="0.1.0")
+
+origins = [
+	"http://localhost:3000",
+	"http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=origins,
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
+)
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+	# Ensure database tables exist
+	Base.metadata.create_all(bind=engine)
+
 
 app.include_router(api_router)

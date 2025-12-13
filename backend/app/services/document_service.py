@@ -3,7 +3,10 @@ from typing import BinaryIO
 from pypdf import PdfReader
 from PIL import Image, ImageSequence
 import pytesseract
+from sqlalchemy.orm import Session
 
+from app.core.db import SessionLocal
+from app.models.document_analysis import DocumentAnalysis
 from app.schemas.document import DocumentType
 from app.services.llm_service import generate_text
 
@@ -69,3 +72,29 @@ def summarize_document(text: str, max_tokens: int = 256) -> str:
     )
 
     return generate_text(prompt, max_tokens=max_tokens)
+
+
+def persist_document_analysis(
+    *,
+    filename: str,
+    text: str,
+    doc_type: DocumentType,
+    summary: str,
+) -> DocumentAnalysis:
+    """Persist a document analysis result to the SQLite database."""
+
+    db: Session = SessionLocal()
+    try:
+        obj = DocumentAnalysis(
+            filename=filename,
+            doc_type=doc_type.value,
+            summary=summary,
+            text_length=len(text),
+            raw_text=text,
+        )
+        db.add(obj)
+        db.commit()
+        db.refresh(obj)
+        return obj
+    finally:
+        db.close()
