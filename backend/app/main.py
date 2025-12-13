@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from app.api.v1 import routes_root
+from app.api.v1 import api_router
 
 app = FastAPI(title="Backend API", version="0.1.0")
 
-app.include_router(routes_root.router)
+app.include_router(api_router)
