@@ -23,6 +23,26 @@ A full-stack example app that uploads clinical documents (PDF/TIFF), extracts te
   - Pull the model once: `ollama pull mistral`
 - **Tesseract OCR** (required for TIFF): install on Windows and ensure `tesseract.exe` is on `PATH`
 
+### Installing Tesseract (Windows)
+
+TIFF OCR requires the **Tesseract** binary (Python `pytesseract` is only a wrapper).
+
+1. Install Tesseract OCR for Windows (commonly via the UB Mannheim build)
+2. Ensure the install folder is on your `PATH` (so `tesseract.exe` is discoverable)
+3. Verify in a new terminal:
+
+```powershell
+tesseract --version
+```
+
+If you cannot (or don’t want to) modify `PATH`, you can point the backend directly to the executable:
+
+```powershell
+$env:TESSERACT_CMD = "C:\Program Files\Tesseract-OCR\tesseract.exe"
+```
+
+Then start the backend from the same terminal.
+
 ## Quickstart
 
 ### 1) Backend (FastAPI)

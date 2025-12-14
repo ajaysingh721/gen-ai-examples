@@ -1,4 +1,5 @@
 from typing import BinaryIO
+import os
 
 from pypdf import PdfReader
 from PIL import Image, ImageSequence
@@ -22,6 +23,10 @@ def extract_text_from_pdf(file_obj: BinaryIO) -> str:
 
 
 def extract_text_from_tiff(file_obj: BinaryIO) -> str:
+    tesseract_cmd = os.getenv("TESSERACT_CMD") or os.getenv("TESSERACT_PATH")
+    if tesseract_cmd:
+        pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+
     image = Image.open(file_obj)
     texts: list[str] = []
     for frame in ImageSequence.Iterator(image):

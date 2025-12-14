@@ -1,4 +1,5 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
+import pytesseract
 
 from app.schemas.document import DocumentAnalysisResponse, DocumentRecord, DocumentType
 from app.services import document_service
@@ -19,7 +20,17 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
     if filename.endswith(".pdf"):
         text = document_service.extract_text_from_pdf(file.file)
     elif filename.endswith(".tif") or filename.endswith(".tiff"):
-        text = document_service.extract_text_from_tiff(file.file)
+        try:
+            text = document_service.extract_text_from_tiff(file.file)
+        except pytesseract.pytesseract.TesseractNotFoundError:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Tesseract OCR is required to process TIFF files but was not found. "
+                    "Install Tesseract and ensure it is on PATH, or set the TESSERACT_CMD environment variable "
+                    "to the full path of tesseract.exe (Windows). See the repo README for details."
+                ),
+            )
     else:
         raise HTTPException(status_code=400, detail="Unsupported file type. Please upload a PDF or TIFF file.")
 
