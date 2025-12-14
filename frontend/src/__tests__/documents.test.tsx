@@ -26,8 +26,26 @@ describe("DocumentsPage", () => {
       },
     ]
 
-    // First fetch: list documents
-    global.fetch = mockFetchOnce(docs) as any
+    const fetchMock = jest
+      .fn()
+      // list
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => docs,
+      })
+      // detail
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ...docs[0],
+          classification_reason: "Contains discharge instructions and hospital course.",
+          raw_text: "Patient discharged on 2025-01-01...",
+        }),
+      })
+
+    global.fetch = fetchMock as any
 
     render(<DocumentsPage />)
 
@@ -42,6 +60,10 @@ describe("DocumentsPage", () => {
     expect(within(dialog).getByText(/^summary$/i)).toBeInTheDocument()
     expect(within(dialog).getByText(/test\.pdf/i)).toBeInTheDocument()
     expect(within(dialog).getByText(/summary line 1/i)).toBeInTheDocument()
+    expect(
+      within(dialog).getByText(/contains discharge instructions/i)
+    ).toBeInTheDocument()
+    expect(within(dialog).getByText(/extracted text/i)).toBeInTheDocument()
   })
 
   it("deletes a document after confirmation", async () => {
@@ -63,6 +85,16 @@ describe("DocumentsPage", () => {
         ok: true,
         status: 200,
         json: async () => docs,
+      })
+      // detail (triggered when opening summary; not used in this test, but keep ordering stable)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ...docs[0],
+          classification_reason: "Test",
+          raw_text: "Test",
+        }),
       })
       // delete
       .mockResolvedValueOnce({

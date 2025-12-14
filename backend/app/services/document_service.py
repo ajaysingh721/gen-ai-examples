@@ -1,5 +1,7 @@
 from typing import BinaryIO
 import os
+import json
+import re
 
 from pypdf import PdfReader
 from PIL import Image, ImageSequence
@@ -8,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import SessionLocal
 from app.models.document_analysis import DocumentAnalysis
-from app.schemas.document import DocumentType, DocumentRecord
+from app.schemas.document import DocumentType, DocumentRecord, DocumentDetail
 from app.services.llm_service import generate_text
 
 
@@ -36,19 +38,18 @@ def extract_text_from_tiff(file_obj: BinaryIO) -> str:
     return "\n".join(texts)
 
 
-def classify_document_type(text: str) -> DocumentType:
-    """Use the LLM to decide what kind of document this is.
+def classify_document_type(text: str) -> tuple[DocumentType, str]:
+    """Use the LLM to decide what kind of document this is, with a reason.
 
-    Categories:
-      - discharge_summary
-      - inpatient_document
-      - census
-      - junk
+    Returns (document_type, classification_reason).
     """
 
     cleaned = text.strip()
     if not cleaned or len(cleaned) < 100:
-        return DocumentType.junk
+        return (
+            DocumentType.junk,
+            "Insufficient extracted text to classify reliably.",
+        )
 
     # Limit the length sent to the LLM for classification
     snippet = cleaned[:4000]
@@ -61,33 +62,63 @@ def classify_document_type(text: str) -> DocumentType:
         "- inpatient_document: any inpatient progress note, H&P, consult, or other in-hospital documentation\n"
         "- census: a list or table of patients, often with bed numbers, units, or service names\n"
         "- junk: anything that is not a meaningful clinical or census document (e.g., scanning errors, noise, empty content)\n\n"
-        "Respond with only one word from: discharge_summary, inpatient_document, census, junk.\n\n"
-        f"Document:\n{snippet}\n\nCategory:"
+        "Return STRICT JSON with exactly these keys:\n"
+        "{\"category\": \"discharge_summary|inpatient_document|census|junk\", \"reason\": \"...\"}\n\n"
+        f"Document:\n{snippet}\n"
     )
 
-    raw = generate_text(prompt, max_tokens=8).strip().lower()
+    raw = generate_text(prompt, max_tokens=128).strip()
+    raw_lower = raw.lower()
+
+    category: str | None = None
+    reason: str | None = None
+
+    # Try JSON first (tolerate extra text by extracting the first JSON object).
+    match = re.search(r"\{.*\}", raw, flags=re.DOTALL)
+    if match:
+        try:
+            payload = json.loads(match.group(0))
+            if isinstance(payload, dict):
+                category = str(payload.get("category") or "").strip().lower() or None
+                reason = str(payload.get("reason") or "").strip() or None
+        except Exception:
+            category = None
+            reason = None
 
     # Normalize and map model output to our enum
-    if "discharge" in raw:
-        return DocumentType.discharge_summary
-    if "inpatient" in raw or "progress" in raw or "note" in raw:
-        return DocumentType.inpatient_document
-    if "census" in raw:
-        return DocumentType.census
-    if "junk" in raw:
-        return DocumentType.junk
+    if category and "discharge" in category:
+        return (DocumentType.discharge_summary, reason or "Classified as discharge summary.")
+    if category and "inpatient" in category:
+        return (DocumentType.inpatient_document, reason or "Classified as inpatient document.")
+    if category and "census" in category:
+        return (DocumentType.census, reason or "Classified as census.")
+    if category and "junk" in category:
+        return (DocumentType.junk, reason or "Classified as junk.")
+
+    # If the model didn't return JSON, fall back to keyword matching on its raw output.
+    if "discharge" in raw_lower:
+        return (DocumentType.discharge_summary, reason or f"Model output: {raw[:300]}")
+    if "inpatient" in raw_lower or "progress" in raw_lower or "note" in raw_lower:
+        return (DocumentType.inpatient_document, reason or f"Model output: {raw[:300]}")
+    if "census" in raw_lower:
+        return (DocumentType.census, reason or f"Model output: {raw[:300]}")
+    if "junk" in raw_lower:
+        return (DocumentType.junk, reason or f"Model output: {raw[:300]}")
 
     # Fallback heuristic if LLM output is unclear
     if len(cleaned) < 150:
-        return DocumentType.junk
+        return (DocumentType.junk, "Short document; treating as junk.")
     if "discharge" in cleaned.lower():
-        return DocumentType.discharge_summary
+        return (DocumentType.discharge_summary, "Heuristic match for 'discharge'.")
     if "census" in cleaned.lower():
-        return DocumentType.census
+        return (DocumentType.census, "Heuristic match for 'census'.")
     if len(cleaned) > 300:
-        return DocumentType.inpatient_document
+        return (
+            DocumentType.inpatient_document,
+            "Heuristic: long clinical text; treating as inpatient document.",
+        )
 
-    return DocumentType.junk
+    return (DocumentType.junk, "Classification uncertain; defaulting to junk.")
 
 
 def summarize_document(text: str, max_tokens: int = 256) -> str:
@@ -109,6 +140,7 @@ def persist_document_analysis(
     filename: str,
     text: str,
     doc_type: DocumentType,
+    classification_reason: str | None,
     summary: str,
 ) -> DocumentAnalysis:
     """Persist a document analysis result to the SQLite database."""
@@ -118,6 +150,7 @@ def persist_document_analysis(
         obj = DocumentAnalysis(
             filename=filename,
             doc_type=doc_type.value,
+            classification_reason=classification_reason,
             summary=summary,
             text_length=len(text),
             raw_text=text,
@@ -148,6 +181,7 @@ def list_recent_documents(limit: int = 20) -> list[DocumentRecord]:
                 doc_type=DocumentType(item.doc_type),
                 summary=item.summary,
                 text_length=item.text_length,
+                classification_reason=getattr(item, "classification_reason", None),
                 created_at=item.created_at,
             )
             for item in items
@@ -171,5 +205,28 @@ def delete_document_analysis(doc_id: int) -> bool:
         db.delete(obj)
         db.commit()
         return True
+    finally:
+        db.close()
+
+
+def get_document_detail(doc_id: int) -> DocumentDetail | None:
+    """Return a single document analysis including extracted text."""
+
+    db: Session = SessionLocal()
+    try:
+        item = db.query(DocumentAnalysis).filter(DocumentAnalysis.id == doc_id).first()
+        if not item:
+            return None
+
+        return DocumentDetail(
+            id=item.id,
+            filename=item.filename,
+            doc_type=DocumentType(item.doc_type),
+            summary=item.summary,
+            text_length=item.text_length,
+            classification_reason=getattr(item, "classification_reason", None),
+            created_at=item.created_at,
+            raw_text=item.raw_text,
+        )
     finally:
         db.close()

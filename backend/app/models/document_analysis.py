@@ -11,6 +11,7 @@ class DocumentAnalysis(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String(512), nullable=False)
     doc_type = Column(String(64), nullable=False)
+    classification_reason = Column(Text, nullable=True)
     summary = Column(Text, nullable=False)
     text_length = Column(Integer, nullable=False)
     raw_text = Column(Text, nullable=False)

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
-from app.core.db import Base, engine
+from app.core.db import Base, engine, ensure_sqlite_schema
 
 app = FastAPI(title="Backend API", version="0.1.0")
 
@@ -24,6 +24,8 @@ app.add_middleware(
 def on_startup() -> None:
 	# Ensure database tables exist
 	Base.metadata.create_all(bind=engine)
+	# Apply minimal migrations for existing SQLite DBs
+	ensure_sqlite_schema()
 
 
 app.include_router(api_router)

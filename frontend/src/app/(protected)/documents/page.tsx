@@ -28,7 +28,12 @@ interface DocumentRecord {
   doc_type: DocumentType;
   summary: string;
   text_length: number;
+  classification_reason?: string | null;
   created_at: string;
+}
+
+interface DocumentDetail extends DocumentRecord {
+  raw_text: string;
 }
 
 export default function DocumentsPage() {
@@ -39,10 +44,38 @@ export default function DocumentsPage() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeDoc, setActiveDoc] = useState<DocumentRecord | null>(null);
+  const [activeDetail, setActiveDetail] = useState<DocumentDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
-  const handleViewSummary = (doc: DocumentRecord) => {
+  const handleViewSummary = async (doc: DocumentRecord) => {
     setActiveDoc(doc);
+    setActiveDetail(null);
+    setDetailError(null);
     setSummaryOpen(true);
+
+    // Fetch full text + classification reason on demand.
+    setDetailLoading(true);
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/documents/${doc.id}`);
+      if (!res.ok) {
+        let detail = "Failed to load document details.";
+        try {
+          const data = await res.json();
+          detail = data?.detail ?? detail;
+        } catch {
+          // ignore
+        }
+        setDetailError(detail);
+        return;
+      }
+      const data = (await res.json()) as DocumentDetail;
+      setActiveDetail(data);
+    } catch (err: any) {
+      setDetailError(err?.message ?? "Unexpected error");
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const handleAskDelete = (doc: DocumentRecord) => {
@@ -198,16 +231,43 @@ export default function DocumentsPage() {
       )}
 
       <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Summary</DialogTitle>
             <DialogDescription>
               {activeDoc?.filename ?? "Selected document"}
             </DialogDescription>
           </DialogHeader>
-          <pre className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
+
+          {(activeDetail?.classification_reason || detailError || detailLoading) && (
+            <div className="rounded-md border bg-muted/30 p-3 text-sm">
+              <div className="font-medium">Classification reason</div>
+              {detailLoading && (
+                <div className="text-muted-foreground">Loading…</div>
+              )}
+              {detailError && (
+                <div className="text-destructive">{detailError}</div>
+              )}
+              {activeDetail?.classification_reason && (
+                <div className="text-muted-foreground">
+                  {activeDetail.classification_reason}
+                </div>
+              )}
+            </div>
+          )}
+
+          <pre className="max-h-60 overflow-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
             {activeDoc?.summary ?? ""}
           </pre>
+
+          {activeDetail?.raw_text && (
+            <details className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
+              <summary className="cursor-pointer font-medium">Extracted text</summary>
+              <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap text-sm">
+                {activeDetail.raw_text}
+              </pre>
+            </details>
+          )}
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={() => setSummaryOpen(false)}>
               Close

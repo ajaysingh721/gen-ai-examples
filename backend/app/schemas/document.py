@@ -15,6 +15,7 @@ class DocumentAnalysisResponse(BaseModel):
     type: DocumentType
     summary: str
     text_length: int
+    classification_reason: str | None = None
 
 
 class DocumentRecord(BaseModel):
@@ -25,4 +26,9 @@ class DocumentRecord(BaseModel):
     doc_type: DocumentType
     summary: str
     text_length: int
+    classification_reason: str | None = None
     created_at: datetime
+
+
+class DocumentDetail(DocumentRecord):
+    raw_text: str

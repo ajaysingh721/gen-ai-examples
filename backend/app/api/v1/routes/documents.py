@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 import pytesseract
 
-from app.schemas.document import DocumentAnalysisResponse, DocumentRecord, DocumentType
+from app.schemas.document import DocumentAnalysisResponse, DocumentDetail, DocumentRecord, DocumentType
 from app.services import document_service
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
@@ -37,7 +37,7 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
     if not text or not text.strip():
         raise HTTPException(status_code=400, detail="Could not extract any text from the document.")
 
-    doc_type = document_service.classify_document_type(text)
+    doc_type, classification_reason = document_service.classify_document_type(text)
 
     if doc_type == DocumentType.junk:
         summary = "Document appears to be junk or contains insufficient clinical content to summarize."
@@ -49,6 +49,7 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
         filename=filename,
         text=text,
         doc_type=doc_type,
+        classification_reason=classification_reason,
         summary=summary,
     )
 
@@ -56,6 +57,7 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
         type=doc_type,
         summary=summary,
         text_length=len(text),
+        classification_reason=classification_reason,
     )
 
 
@@ -67,6 +69,14 @@ async def list_documents(limit: int = 20) -> list[DocumentRecord]:
     """
 
     return document_service.list_recent_documents(limit=limit)
+
+
+@router.get("/{doc_id}", response_model=DocumentDetail)
+async def get_document(doc_id: int) -> DocumentDetail:
+    item = document_service.get_document_detail(doc_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return item
 
 
 @router.delete("/{doc_id}")
