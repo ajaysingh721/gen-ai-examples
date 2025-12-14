@@ -74,8 +74,9 @@ export default function UploadSummarizePage() {
 
           xhr.upload.onprogress = (progressEvent) => {
             if (progressEvent.lengthComputable) {
+              // Use the first 50% for upload progress
               const percent = Math.round(
-                (progressEvent.loaded / progressEvent.total) * 100,
+                (progressEvent.loaded / progressEvent.total) * 50,
               );
               setUploadProgress(percent);
             }
@@ -83,10 +84,8 @@ export default function UploadSummarizePage() {
 
           xhr.upload.onload = () => {
             setUploadPhase("analyzing");
-            setUploadProgress((prev) => {
-              if (prev === null) return 90;
-              return prev < 90 ? 90 : prev;
-            });
+            // Keep the remaining 50% for analysis until it completes
+            setUploadProgress(50);
           };
 
           xhr.onreadystatechange = () => {
@@ -94,6 +93,7 @@ export default function UploadSummarizePage() {
               if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                   const data = JSON.parse(xhr.responseText);
+                  setUploadProgress(100);
                   resolve(data as DocumentAnalysisResponse);
                 } catch {
                   reject(new Error("Invalid response from server."));
@@ -125,7 +125,8 @@ export default function UploadSummarizePage() {
     } finally {
       setLoading(false);
       setUploadPhase(null);
-      setUploadProgress(null);
+      // Let the UI briefly render 100% before hiding.
+      window.setTimeout(() => setUploadProgress(null), 400);
     }
   };
 
