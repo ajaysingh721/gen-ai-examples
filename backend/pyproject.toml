@@ -10,6 +10,7 @@ dependencies = [
 	"transformers",
 	"torch",
 	"pypdf",
+	"pymupdf",
 	"pillow",
 	"pytesseract",
 	"sqlalchemy",

@@ -43,6 +43,23 @@ $env:TESSERACT_CMD = "C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 Then start the backend from the same terminal.
 
+### OCR for scanned PDFs (optional)
+
+Some PDFs are image-only (scanned) and contain no embedded text. In that case, normal PDF text extraction can return empty.
+
+You can enable an **optional PDF OCR fallback** (slower) by setting:
+
+```powershell
+$env:PDF_OCR_ENABLED = "1"
+```
+
+Optional tuning:
+
+- `PDF_OCR_MAX_PAGES` (default `5`)
+- `PDF_OCR_DPI` (default `200`)
+
+This requires Tesseract to be installed (same requirement as TIFF OCR).
+
 ## Quickstart
 
 ### 1) Backend (FastAPI)

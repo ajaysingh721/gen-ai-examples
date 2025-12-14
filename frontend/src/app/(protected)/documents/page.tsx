@@ -123,6 +123,11 @@ export default function DocumentsPage() {
           return;
         }
         const data = (await res.json()) as DocumentRecord[];
+        // Ensure newest-first ordering (created_at descending)
+        data.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
         setDocuments(data);
       } catch (err: any) {
         setError(err.message ?? "Unexpected error");

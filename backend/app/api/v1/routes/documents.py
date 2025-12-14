@@ -18,7 +18,18 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
     await file.seek(0)
 
     if filename.endswith(".pdf"):
-        text = document_service.extract_text_from_pdf(file.file)
+        try:
+            text = document_service.extract_text_from_pdf(file.file)
+        except pytesseract.pytesseract.TesseractNotFoundError:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "PDF OCR is enabled but Tesseract OCR was not found. "
+                    "Install Tesseract and ensure it is on PATH, or set TESSERACT_CMD to the full path of tesseract.exe."
+                ),
+            )
+        except RuntimeError as e:
+            raise HTTPException(status_code=400, detail=str(e))
     elif filename.endswith(".tif") or filename.endswith(".tiff"):
         try:
             text = document_service.extract_text_from_tiff(file.file)
@@ -35,7 +46,16 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
         raise HTTPException(status_code=400, detail="Unsupported file type. Please upload a PDF or TIFF file.")
 
     if not text or not text.strip():
-        raise HTTPException(status_code=400, detail="Could not extract any text from the document.")
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Could not extract any text from the document. "
+                "If this is a scanned/image-based PDF, text extraction will be empty. "
+                "Try uploading a TIFF, or enable OCR for PDFs with PDF_OCR_ENABLED=1 (requires Tesseract). "
+                "Also ensure the backend dependency 'pymupdf' is installed (pip install -e .) "
+                "to improve PDF text extraction."
+            ),
+        )
 
     doc_type, classification_reason = document_service.classify_document_type(text)
 
