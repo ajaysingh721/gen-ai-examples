@@ -234,13 +234,17 @@ export default function DocumentsPage() {
         <DialogContent className="w-[95vw] max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Summary</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="mb-2">
               {activeDoc?.filename ?? "Selected document"}
             </DialogDescription>
           </DialogHeader>
 
+          <pre className="max-h-60 overflow-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
+            {activeDoc?.summary ?? ""}
+          </pre>
+
           {(activeDetail?.classification_reason || detailError || detailLoading) && (
-            <div className="rounded-md border bg-muted/30 p-3 text-sm">
+            <section className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
               <div className="font-medium">Classification reason</div>
               {detailLoading && (
                 <div className="text-muted-foreground">Loading…</div>
@@ -253,12 +257,8 @@ export default function DocumentsPage() {
                   {activeDetail.classification_reason}
                 </div>
               )}
-            </div>
+            </section>
           )}
-
-          <pre className="max-h-60 overflow-auto whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
-            {activeDoc?.summary ?? ""}
-          </pre>
 
           {activeDetail?.raw_text && (
             <details className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
