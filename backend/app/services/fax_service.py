@@ -174,12 +174,10 @@ def detect_urgency(text: str, category: FaxCategory) -> Tuple[bool, int]:
             break
 
     # Higher priority for certain categories
-    if category == FaxCategory.prescriptions:
+    if category == FaxCategory.discharge_summary:
         priority = max(priority, 60)
-    elif category == FaxCategory.referrals:
+    elif category == FaxCategory.inpatient_document:
         priority = max(priority, 55)
-    elif category == FaxCategory.lab_results:
-        priority = max(priority, 50)
 
     return (is_urgent, priority)
 
@@ -629,21 +627,31 @@ def get_settings() -> FaxSettingsResponse:
             "confidence_threshold": DEFAULT_CONFIDENCE_THRESHOLD,
         }
 
-        db_settings = db.query(FaxSettings).all()
-        for s in db_settings:
-            if s.key == "watch_folder":
-                settings["watch_folder"] = s.value or DEFAULT_WATCH_FOLDER
-            elif s.key == "auto_process":
-                settings["auto_process"] = s.value == "true"
-            elif s.key == "require_review":
-                settings["require_review"] = s.value == "true"
-            elif s.key == "confidence_threshold":
-                try:
-                    settings["confidence_threshold"] = float(s.value)
-                except (ValueError, TypeError):
-                    pass
+        try:
+            db_settings = db.query(FaxSettings).all()
+            for s in db_settings:
+                if s.key == "watch_folder":
+                    settings["watch_folder"] = s.value or DEFAULT_WATCH_FOLDER
+                elif s.key == "auto_process":
+                    settings["auto_process"] = s.value == "true"
+                elif s.key == "require_review":
+                    settings["require_review"] = s.value == "true"
+                elif s.key == "confidence_threshold":
+                    try:
+                        settings["confidence_threshold"] = float(s.value)
+                    except (ValueError, TypeError):
+                        pass
+        except Exception:
+            # If database query fails, use defaults
+            pass
 
-        return FaxSettingsResponse(**settings)
+        # Ensure all fields are properly typed
+        return FaxSettingsResponse(
+            watch_folder=str(settings.get("watch_folder", DEFAULT_WATCH_FOLDER)),
+            auto_process=bool(settings.get("auto_process", True)),
+            require_review=bool(settings.get("require_review", True)),
+            confidence_threshold=float(settings.get("confidence_threshold", DEFAULT_CONFIDENCE_THRESHOLD))
+        )
     finally:
         db.close()
 

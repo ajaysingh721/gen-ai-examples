@@ -82,6 +82,21 @@ async def get_queue_summary() -> FaxQueueSummary:
     return fax_service.get_queue_summary()
 
 
+# --- Settings Endpoints ---
+
+@router.get("/settings", response_model=FaxSettingsResponse)
+async def get_fax_settings() -> FaxSettingsResponse:
+    """Get current fax processing settings."""
+    return fax_service.get_settings()
+
+
+@router.put("/settings", response_model=FaxSettingsResponse)
+async def update_fax_settings(settings: FaxSettingsUpdate) -> FaxSettingsResponse:
+    """Update fax processing settings."""
+    updates = settings.model_dump(exclude_none=True)
+    return fax_service.update_settings(updates)
+
+
 # --- Single Fax Endpoints ---
 
 @router.get("/{fax_id}", response_model=FaxDetail)
@@ -300,21 +315,3 @@ async def trigger_scan() -> dict:
     watcher = get_watcher()
     watcher.manual_scan()
     return {"success": True, "message": "Scan triggered"}
-
-
-# --- Settings Endpoints ---
-
-@router.get("/settings", response_model=FaxSettingsResponse)
-async def get_settings() -> FaxSettingsResponse:
-    """Get current fax processing settings."""
-    return fax_service.get_settings()
-
-
-@router.put("/settings", response_model=FaxSettingsResponse)
-async def update_settings(settings: FaxSettingsUpdate) -> FaxSettingsResponse:
-    """Update fax processing settings."""
-    updates = settings.model_dump(exclude_none=True)
-    return fax_service.update_settings(updates)
-
-
-
