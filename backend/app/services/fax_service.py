@@ -209,9 +209,17 @@ def process_new_fax(file_path: str, filename: str) -> Optional[FaxRecord]:
         # Determine status based on confidence and settings
         # Auto-approve if confidence >= threshold and auto_process is enabled
         settings = get_settings()
-        if confidence >= settings.confidence_threshold and not settings.require_review:
+        is_auto_approved = confidence >= settings.confidence_threshold and not settings.require_review
+        
+        if is_auto_approved:
             initial_status = FaxStatus.approved.value
             final_cat = category.value
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(
+                f"Auto-approved '{filename}': {category.value} "
+                f"(confidence: {confidence*100:.1f}%, threshold: {settings.confidence_threshold*100:.0f}%)"
+            )
         else:
             initial_status = FaxStatus.categorized.value
             final_cat = None
@@ -236,6 +244,7 @@ def process_new_fax(file_path: str, filename: str) -> Optional[FaxRecord]:
             final_category=final_cat,
             reviewed_at=datetime.utcnow() if final_cat else None,
             reviewed_by="auto-approval" if final_cat else None,
+            auto_approved=is_auto_approved,
         )
 
         db.add(fax)
@@ -512,6 +521,11 @@ def get_fax_stats() -> FaxStats:
             Fax.reviewed_at >= week_start
         ).scalar() or 0
 
+        # Count auto-approved faxes
+        auto_approved_count = db.query(func.count(Fax.id)).filter(
+            Fax.auto_approved == True
+        ).scalar() or 0
+
         return FaxStats(
             total_faxes=total,
             pending=pending,
@@ -519,7 +533,7 @@ def get_fax_stats() -> FaxStats:
             approved=approved,
             overridden=overridden,
             processed=processed,
-            auto_approved=0,  # Auto-approved document count (placeholder for future implementation)
+            auto_approved=auto_approved_count,
             category_counts=category_counts,
             total_reviewed=total_reviewed,
             accuracy_rate=accuracy_rate,

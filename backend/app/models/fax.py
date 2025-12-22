@@ -50,6 +50,7 @@ class Fax(Base):
     override_reason = Column(Text, nullable=True)
     reviewed_by = Column(String(256), nullable=True)  # Username who reviewed
     reviewed_at = Column(DateTime, nullable=True)
+    auto_approved = Column(Boolean, default=False, nullable=False)  # Was this auto-approved?
     
     # Document content
     raw_text = Column(Text, nullable=True)

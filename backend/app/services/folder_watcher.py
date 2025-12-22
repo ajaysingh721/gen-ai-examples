@@ -152,12 +152,15 @@ class FaxFolderWatcher:
             
             new_files.append(file_path)
         
+        # Set initial queue count
         self._state.files_in_queue = len(new_files)
         
         # Process new files
         for file_path in new_files:
             try:
                 self._process_file(file_path)
+                # Update queue count after each file is processed
+                self._state.files_in_queue = max(0, self._state.files_in_queue - 1)
             except Exception as e:
                 error_msg = f"Error processing {file_path.name}: {e}"
                 logger.error(error_msg)

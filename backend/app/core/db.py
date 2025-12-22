@@ -22,15 +22,24 @@ def ensure_sqlite_schema() -> None:
     """
 
     with engine.begin() as conn:
+        # Check document_analyses table
         rows = conn.execute(text("PRAGMA table_info(document_analyses)")).fetchall()
-        if not rows:
-            # Table doesn't exist yet; create_all() will handle it.
-            return
-
-        existing_columns = {row[1] for row in rows}  # row[1] is column name
-        if "classification_reason" not in existing_columns:
-            conn.execute(
-                text(
-                    "ALTER TABLE document_analyses ADD COLUMN classification_reason TEXT"
+        if rows:
+            existing_columns = {row[1] for row in rows}  # row[1] is column name
+            if "classification_reason" not in existing_columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE document_analyses ADD COLUMN classification_reason TEXT"
+                    )
                 )
-            )
+        
+        # Check faxes table
+        fax_rows = conn.execute(text("PRAGMA table_info(faxes)")).fetchall()
+        if fax_rows:
+            fax_columns = {row[1] for row in fax_rows}
+            if "auto_approved" not in fax_columns:
+                conn.execute(
+                    text(
+                        "ALTER TABLE faxes ADD COLUMN auto_approved BOOLEAN DEFAULT 0 NOT NULL"
+                    )
+                )
