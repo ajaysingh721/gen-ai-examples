@@ -26,7 +26,7 @@ from app.services.document_service import extract_text_from_pdf, extract_text_fr
 
 # Default settings
 DEFAULT_WATCH_FOLDER = os.environ.get("FAX_WATCH_FOLDER", "./fax_inbox")
-DEFAULT_CONFIDENCE_THRESHOLD = 0.7
+DEFAULT_CONFIDENCE_THRESHOLD = 0.9
 
 
 def get_file_hash(file_path: str) -> str:
@@ -220,12 +220,22 @@ def process_new_fax(file_path: str, filename: str) -> Optional[FaxRecord]:
         # Generate summary
         summary = summarize_fax(text)
 
+        # Determine status based on confidence and settings
+        # Auto-approve if confidence >= threshold and auto_process is enabled
+        settings = get_settings()
+        if confidence >= settings.confidence_threshold and not settings.require_review:
+            initial_status = FaxStatus.approved.value
+            final_cat = category.value
+        else:
+            initial_status = FaxStatus.categorized.value
+            final_cat = None
+
         # Create fax record
         fax = Fax(
             filename=filename,
             original_path=file_path,
             file_hash=file_hash,
-            status=FaxStatus.categorized.value,
+            status=initial_status,
             ai_category=category.value,
             ai_confidence=confidence,
             ai_reason=reason,
@@ -237,6 +247,9 @@ def process_new_fax(file_path: str, filename: str) -> Optional[FaxRecord]:
             priority_score=priority,
             received_at=datetime.utcnow(),
             processed_at=datetime.utcnow(),
+            final_category=final_cat,
+            reviewed_at=datetime.utcnow() if final_cat else None,
+            reviewed_by="auto-approval" if final_cat else None,
         )
 
         db.add(fax)
