@@ -36,6 +36,7 @@ export function AppSidebar() {
   const isDocuments = pathname?.startsWith("/documents");
   const isFaxQueue = pathname === "/faxes";
   const isFaxUpload = pathname === "/faxes/upload";
+  const isFaxStatistics = pathname === "/faxes/statistics";
   const isFaxSettings = pathname === "/faxes/settings";
 
   return (
@@ -103,13 +104,27 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
+                  isActive={isFaxStatistics}
+                  tooltip="Fax Statistics"
+                  className="rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-blue-500/25"
+                >
+                  <Link href="/faxes/statistics">
+                    <BarChart3 className="h-4 w-4" />
+                    <span className="font-medium">Statistics</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
                   isActive={isFaxSettings}
                   tooltip="Fax Settings"
                   className="rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-blue-500/25"
                 >
                   <Link href="/faxes/settings">
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="font-medium">Settings & Stats</span>
+                    <FileText className="h-4 w-4" />
+                    <span className="font-medium">Settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

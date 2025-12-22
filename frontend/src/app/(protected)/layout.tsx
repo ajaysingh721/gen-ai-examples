@@ -63,8 +63,11 @@ export default function ProtectedLayout({
     if (normalizedPath === "/faxes/upload") {
       return { href: "/faxes/upload", label: "Upload Fax" };
     }
+    if (normalizedPath === "/faxes/statistics") {
+      return { href: "/faxes/statistics", label: "Statistics" };
+    }
     if (normalizedPath === "/faxes/settings") {
-      return { href: "/faxes/settings", label: "Settings & Stats" };
+      return { href: "/faxes/settings", label: "Settings" };
     }
 
     const segment = normalizedPath.split("/").filter(Boolean)[0] ?? "";
