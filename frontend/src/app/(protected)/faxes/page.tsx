@@ -20,6 +20,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -510,24 +518,23 @@ export default function FaxQueuePage() {
             <Filter className="h-4 w-4" />
             <span>Filter:</span>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as FaxStatus | "all")}
-            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-          >
-            <option value="all">All Status</option>
-            <option value="categorized">Awaiting Review</option>
-            <option value="approved">Approved</option>
-            <option value="overridden">Overridden</option>
-            <option value="processed">Processed</option>
-            <option value="pending">Pending</option>
-          </select>
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as FaxStatus | "all")}>
+            <SelectTrigger className="w-[180px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="categorized">Awaiting Review</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="overridden">Overridden</SelectItem>
+              <SelectItem value="processed">Processed</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
           <label className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 cursor-pointer">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={urgentOnly}
-              onChange={(e) => setUrgentOnly(e.target.checked)}
-              className="rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500/20"
+              onCheckedChange={(checked) => setUrgentOnly(checked === true)}
             />
             <AlertTriangle className="h-4 w-4 text-red-500" />
             Urgent only
@@ -587,11 +594,9 @@ export default function FaxQueuePage() {
                 <tr>
                   {statusFilter === "categorized" && (
                     <th className="px-4 py-3 w-12">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedIds.size === faxes.length && faxes.length > 0}
-                        onChange={toggleSelectAll}
-                        className="rounded border-slate-300 dark:border-slate-600 text-blue-500 focus:ring-blue-500/20"
+                        onCheckedChange={() => toggleSelectAll()}
                       />
                     </th>
                   )}
@@ -614,11 +619,9 @@ export default function FaxQueuePage() {
                   >
                     {statusFilter === "categorized" && (
                       <td className="px-4 py-4">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={selectedIds.has(fax.id)}
-                          onChange={() => toggleSelect(fax.id)}
-                          className="rounded border-slate-300 dark:border-slate-600 text-blue-500 focus:ring-blue-500/20"
+                          onCheckedChange={() => toggleSelect(fax.id)}
                         />
                       </td>
                     )}
@@ -904,18 +907,19 @@ export default function FaxQueuePage() {
               <>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Select correct category:</label>
-                  <select
-                    value={overrideCategory}
-                    onChange={(e) => setOverrideCategory(e.target.value as FaxCategory)}
-                    className="w-full border rounded px-3 py-2 text-sm"
-                  >
-                    <option value="">Choose a category...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={overrideCategory} onValueChange={(value) => setOverrideCategory(value as FaxCategory | "")}>
+                    <SelectTrigger className="w-full border rounded px-3 py-2 text-sm">
+                      <SelectValue placeholder="Choose a category..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Choose a category...</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Reason (optional):</label>
