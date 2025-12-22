@@ -37,7 +37,7 @@ export default function ProtectedLayout({
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+      <div className="w-full min-h-screen flex items-center justify-center bg-zinc-50">
         <p className="text-sm text-zinc-500">Loading session…</p>
       </div>
     );
@@ -84,7 +84,7 @@ export default function ProtectedLayout({
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-foreground flex">
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-foreground flex">
         <AppSidebar />
 
         <SidebarInset className="w-full">

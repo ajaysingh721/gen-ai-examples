@@ -51,6 +51,25 @@ async def list_faxes(
     )
 
 
+# --- Categories Info ---
+
+@router.get("/categories", response_model=list[dict])
+async def list_categories() -> list[dict]:
+    """List all available fax categories with descriptions."""
+    return [
+        {"value": "medical_records", "label": "Medical Records", "description": "Patient medical records, charts, history"},
+        {"value": "lab_results", "label": "Lab Results", "description": "Laboratory test results, blood work, diagnostic tests"},
+        {"value": "prescriptions", "label": "Prescriptions", "description": "Prescription requests, medication orders, refill requests"},
+        {"value": "referrals", "label": "Referrals", "description": "Patient referrals to specialists or other providers"},
+        {"value": "insurance", "label": "Insurance", "description": "Insurance forms, authorizations, coverage information"},
+        {"value": "billing", "label": "Billing", "description": "Bills, invoices, payment information"},
+        {"value": "patient_correspondence", "label": "Patient Correspondence", "description": "Letters to/from patients, appointment confirmations"},
+        {"value": "administrative", "label": "Administrative", "description": "Office memos, general administrative documents"},
+        {"value": "urgent", "label": "Urgent", "description": "Time-sensitive documents requiring immediate attention"},
+        {"value": "unknown", "label": "Unknown", "description": "Cannot determine category"},
+    ]
+
+
 @router.get("/queue", response_model=list[FaxRecord])
 async def get_review_queue(limit: int = Query(50, ge=1, le=200)) -> list[FaxRecord]:
     """Get faxes that are awaiting review (categorized but not yet approved)."""
@@ -301,20 +320,4 @@ async def update_settings(settings: FaxSettingsUpdate) -> FaxSettingsResponse:
     return fax_service.update_settings(updates)
 
 
-# --- Categories Info ---
 
-@router.get("/categories", response_model=list[dict])
-async def list_categories() -> list[dict]:
-    """List all available fax categories with descriptions."""
-    return [
-        {"value": "medical_records", "label": "Medical Records", "description": "Patient medical records, charts, history"},
-        {"value": "lab_results", "label": "Lab Results", "description": "Laboratory test results, blood work, diagnostic tests"},
-        {"value": "prescriptions", "label": "Prescriptions", "description": "Prescription requests, medication orders, refill requests"},
-        {"value": "referrals", "label": "Referrals", "description": "Patient referrals to specialists or other providers"},
-        {"value": "insurance", "label": "Insurance", "description": "Insurance forms, authorizations, coverage information"},
-        {"value": "billing", "label": "Billing", "description": "Bills, invoices, payment information"},
-        {"value": "patient_correspondence", "label": "Patient Correspondence", "description": "Letters to/from patients, appointment confirmations"},
-        {"value": "administrative", "label": "Administrative", "description": "Office memos, general administrative documents"},
-        {"value": "urgent", "label": "Urgent", "description": "Time-sensitive documents requiring immediate attention"},
-        {"value": "unknown", "label": "Unknown", "description": "Cannot determine category"},
-    ]
