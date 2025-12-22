@@ -8,7 +8,7 @@ class DocumentType(str, Enum):
     discharge_summary = "discharge_summary"
     inpatient_document = "inpatient_document"
     census = "census"
-    junk = "junk"
+    junk_fax = "junk_fax"
 
 
 class DocumentAnalysisResponse(BaseModel):
@@ -16,6 +16,8 @@ class DocumentAnalysisResponse(BaseModel):
     summary: str
     text_length: int
     classification_reason: str | None = None
+    review_note: str | None = None
+    auto_approved: bool = False
 
 
 class DocumentRecord(BaseModel):
@@ -27,6 +29,8 @@ class DocumentRecord(BaseModel):
     summary: str
     text_length: int
     classification_reason: str | None = None
+    review_note: str | None = None
+    auto_approved: bool = False
     created_at: datetime
 
 

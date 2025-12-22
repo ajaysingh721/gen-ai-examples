@@ -17,16 +17,10 @@ class FaxStatus(str, PyEnum):
 
 class FaxCategory(str, PyEnum):
     """Categories for fax documents."""
-    medical_records = "medical_records"
-    lab_results = "lab_results"
-    prescriptions = "prescriptions"
-    referrals = "referrals"
-    insurance = "insurance"
-    billing = "billing"
-    patient_correspondence = "patient_correspondence"
-    administrative = "administrative"
-    urgent = "urgent"
-    unknown = "unknown"
+    discharge_summary = "discharge_summary"
+    inpatient_document = "inpatient_document"
+    census = "census"
+    junk_fax = "junk_fax"
 
 
 class Fax(Base):

@@ -57,16 +57,10 @@ async def list_faxes(
 async def list_categories() -> list[dict]:
     """List all available fax categories with descriptions."""
     return [
-        {"value": "medical_records", "label": "Medical Records", "description": "Patient medical records, charts, history"},
-        {"value": "lab_results", "label": "Lab Results", "description": "Laboratory test results, blood work, diagnostic tests"},
-        {"value": "prescriptions", "label": "Prescriptions", "description": "Prescription requests, medication orders, refill requests"},
-        {"value": "referrals", "label": "Referrals", "description": "Patient referrals to specialists or other providers"},
-        {"value": "insurance", "label": "Insurance", "description": "Insurance forms, authorizations, coverage information"},
-        {"value": "billing", "label": "Billing", "description": "Bills, invoices, payment information"},
-        {"value": "patient_correspondence", "label": "Patient Correspondence", "description": "Letters to/from patients, appointment confirmations"},
-        {"value": "administrative", "label": "Administrative", "description": "Office memos, general administrative documents"},
-        {"value": "urgent", "label": "Urgent", "description": "Time-sensitive documents requiring immediate attention"},
-        {"value": "unknown", "label": "Unknown", "description": "Cannot determine category"},
+        {"value": "discharge_summary", "label": "Discharge Summary", "description": "Patient discharge summaries from hospital stays"},
+        {"value": "inpatient_document", "label": "Inpatient Document", "description": "Inpatient progress notes, H&P, consults, and other in-hospital documentation"},
+        {"value": "census", "label": "Census", "description": "Patient census lists with bed numbers, units, or service names"},
+        {"value": "junk_fax", "label": "Junk Fax", "description": "Non-clinical documents, scanning errors, or spam faxes"},
     ]
 
 
@@ -262,7 +256,8 @@ async def get_watcher_status() -> WatcherStatus:
         watch_folder=state.watch_folder,
         files_in_queue=state.files_in_queue,
         last_scan_at=state.last_scan_at,
-        errors=state.errors
+        errors=state.errors,
+        currently_processing_file=state.currently_processing_file
     )
 
 
@@ -277,7 +272,8 @@ async def start_folder_watcher(watch_folder: Optional[str] = None) -> WatcherSta
         watch_folder=state.watch_folder,
         files_in_queue=state.files_in_queue,
         last_scan_at=state.last_scan_at,
-        errors=state.errors
+        errors=state.errors,
+        currently_processing_file=state.currently_processing_file
     )
 
 
@@ -293,7 +289,8 @@ async def stop_folder_watcher() -> WatcherStatus:
         watch_folder=state.watch_folder,
         files_in_queue=state.files_in_queue,
         last_scan_at=state.last_scan_at,
-        errors=state.errors
+        errors=state.errors,
+        currently_processing_file=state.currently_processing_file
     )
 
 

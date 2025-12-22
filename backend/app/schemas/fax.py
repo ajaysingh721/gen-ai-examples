@@ -16,16 +16,10 @@ class FaxStatus(str, Enum):
 
 class FaxCategory(str, Enum):
     """Categories for fax documents."""
-    medical_records = "medical_records"
-    lab_results = "lab_results"
-    prescriptions = "prescriptions"
-    referrals = "referrals"
-    insurance = "insurance"
-    billing = "billing"
-    patient_correspondence = "patient_correspondence"
-    administrative = "administrative"
-    urgent = "urgent"
-    unknown = "unknown"
+    discharge_summary = "discharge_summary"
+    inpatient_document = "inpatient_document"
+    census = "census"
+    junk_fax = "junk_fax"
 
 
 # --- Request/Response Schemas ---
@@ -145,6 +139,7 @@ class FaxStats(BaseModel):
     approved: int
     overridden: int
     processed: int
+    auto_approved: int  # Auto-approved documents count
     
     # Category breakdown
     category_counts: dict[str, int]
@@ -194,3 +189,4 @@ class WatcherStatus(BaseModel):
     files_in_queue: int
     last_scan_at: Optional[datetime] = None
     errors: List[str] = []
+    currently_processing_file: Optional[str] = None

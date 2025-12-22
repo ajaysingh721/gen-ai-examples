@@ -59,8 +59,8 @@ async def analyze_document(file: UploadFile = File(...)) -> DocumentAnalysisResp
 
     doc_type, classification_reason = document_service.classify_document_type(text)
 
-    if doc_type == DocumentType.junk:
-        summary = "Document appears to be junk or contains insufficient clinical content to summarize."
+    if doc_type == DocumentType.junk_fax:
+        summary = "Document appears to be junk fax or contains insufficient clinical content to summarize."
     else:
         summary = document_service.summarize_document(text)
 
@@ -89,6 +89,12 @@ async def list_documents(limit: int = 20) -> list[DocumentRecord]:
     """
 
     return document_service.list_recent_documents(limit=limit)
+
+
+@router.get("/stats")
+async def get_document_stats() -> dict:
+    """Get statistics about document processing."""
+    return document_service.get_document_stats()
 
 
 @router.get("/{doc_id}", response_model=DocumentDetail)

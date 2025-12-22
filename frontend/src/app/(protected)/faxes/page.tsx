@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   XCircle,
   Filter,
+  FolderOpen,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -53,16 +54,10 @@ import {
 // Types
 type FaxStatus = "pending" | "categorized" | "approved" | "overridden" | "processed";
 type FaxCategory =
-  | "medical_records"
-  | "lab_results"
-  | "prescriptions"
-  | "referrals"
-  | "insurance"
-  | "billing"
-  | "patient_correspondence"
-  | "administrative"
-  | "urgent"
-  | "unknown";
+  | "discharge_summary"
+  | "inpatient_document"
+  | "census"
+  | "junk_fax";
 
 interface FaxRecord {
   id: number;
@@ -105,6 +100,7 @@ interface WatcherStatus {
   files_in_queue: number;
   last_scan_at: string | null;
   errors: string[];
+  currently_processing_file: string | null;
 }
 
 interface CategoryInfo {
@@ -116,29 +112,17 @@ interface CategoryInfo {
 const API_BASE = "http://localhost:8000/api/v1/faxes";
 
 const categoryLabels: Record<FaxCategory, string> = {
-  medical_records: "Medical Records",
-  lab_results: "Lab Results",
-  prescriptions: "Prescriptions",
-  referrals: "Referrals",
-  insurance: "Insurance",
-  billing: "Billing",
-  patient_correspondence: "Patient Correspondence",
-  administrative: "Administrative",
-  urgent: "Urgent",
-  unknown: "Unknown",
+  discharge_summary: "Discharge Summary",
+  inpatient_document: "Inpatient Document",
+  census: "Census",
+  junk_fax: "Junk Fax",
 };
 
 const categoryColors: Record<FaxCategory, string> = {
-  medical_records: "bg-blue-100 text-blue-700 border border-blue-200",
-  lab_results: "bg-emerald-100 text-emerald-700 border border-emerald-200",
-  prescriptions: "bg-purple-100 text-purple-700 border border-purple-200",
-  referrals: "bg-orange-100 text-orange-700 border border-orange-200",
-  insurance: "bg-cyan-100 text-cyan-700 border border-cyan-200",
-  billing: "bg-amber-100 text-amber-700 border border-amber-200",
-  patient_correspondence: "bg-pink-100 text-pink-700 border border-pink-200",
-  administrative: "bg-slate-100 text-slate-700 border border-slate-200",
-  urgent: "bg-red-100 text-red-700 border border-red-200",
-  unknown: "bg-zinc-100 text-zinc-600 border border-zinc-200",
+  discharge_summary: "bg-blue-100 text-blue-700 border border-blue-200",
+  inpatient_document: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  census: "bg-amber-100 text-amber-700 border border-amber-200",
+  junk_fax: "bg-slate-100 text-slate-600 border border-slate-200",
 };
 
 const statusColors: Record<FaxStatus, string> = {
@@ -407,7 +391,28 @@ export default function FaxQueuePage() {
       </header>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
+          <CardHeader className="pb-2">
+            <CardDescription className="text-indigo-100">Queue Files</CardDescription>
+            <CardTitle className="text-4xl font-bold text-white">{watcherStatus?.files_in_queue ?? 0}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-sm text-indigo-100">
+                <FolderOpen className="h-4 w-4" />
+                Files in queue
+              </div>
+              {watcherStatus?.currently_processing_file && (
+                <div className="text-xs text-indigo-200 truncate" title={watcherStatus.currently_processing_file}>
+                  Processing: {watcherStatus.currently_processing_file}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25">
           <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
           <CardHeader className="pb-2">

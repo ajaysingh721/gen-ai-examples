@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { BarChart3, TrendingUp, CheckCircle2, XCircle, Clock, Sparkles, Activity, FileText } from "lucide-react";
+import { BarChart3, TrendingUp, CheckCircle2, XCircle, Clock, Sparkles, Activity, FileText, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,7 @@ interface FaxStats {
   approved: number;
   overridden: number;
   processed: number;
+  auto_approved: number;
   category_counts: Record<string, number>;
   total_reviewed: number;
   accuracy_rate: number;
@@ -31,40 +32,39 @@ interface FaxStats {
 const API_BASE = "http://localhost:8000/api/v1/faxes";
 
 const categoryLabels: Record<string, string> = {
-  medical_records: "Medical Records",
-  lab_results: "Lab Results",
-  prescriptions: "Prescriptions",
-  referrals: "Referrals",
-  insurance: "Insurance",
-  billing: "Billing",
-  patient_correspondence: "Patient Correspondence",
-  administrative: "Administrative",
-  urgent: "Urgent",
-  unknown: "Unknown",
+  discharge_summary: "Discharge Summary",
+  inpatient_document: "Inpatient Document",
+  census: "Census",
+  junk_fax: "Junk Fax",
 };
 
 const categoryColors: Record<string, string> = {
-  medical_records: "from-blue-500 to-blue-600",
-  lab_results: "from-emerald-500 to-teal-600",
-  prescriptions: "from-purple-500 to-violet-600",
-  referrals: "from-orange-500 to-amber-600",
-  insurance: "from-cyan-500 to-blue-600",
-  billing: "from-yellow-500 to-orange-600",
-  patient_correspondence: "from-pink-500 to-rose-600",
-  administrative: "from-slate-500 to-slate-600",
-  urgent: "from-red-500 to-rose-600",
-  unknown: "from-zinc-500 to-slate-600",
+  discharge_summary: "from-blue-500 to-indigo-600",
+  inpatient_document: "from-emerald-500 to-green-600",
+  census: "from-amber-500 to-yellow-600",
+  junk_fax: "from-slate-400 to-gray-500",
 };
 
 export default function FaxStatisticsPage() {
   const [stats, setStats] = useState<FaxStats | null>(null);
+  const [docStats, setDocStats] = useState<{ total_documents: number; auto_approved: number; category_counts: Record<string, number> } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API_BASE}/stats`);
-      if (res.ok) {
-        setStats(await res.json());
+      const [faxRes, docRes] = await Promise.all([
+        fetch(`${API_BASE}/stats`),
+        fetch("http://localhost:8000/api/v1/documents/stats"),
+      ]);
+      if (faxRes.ok) {
+        const faxData = await faxRes.json();
+        // Merge auto_approved from documents if available
+        if (docRes.ok) {
+          const docData = await docRes.json();
+          setDocStats(docData);
+          faxData.auto_approved = docData.auto_approved || 0;
+        }
+        setStats(faxData);
       }
     } catch {
       toast.error("Failed to load statistics");
@@ -129,7 +129,7 @@ export default function FaxStatisticsPage() {
       </div>
 
       {/* Stats Overview Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-slate-600 to-slate-800 text-white shadow-lg shadow-slate-500/25">
           <div className="absolute right-0 top-0 -mr-4 -mt-4 h-20 w-20 rounded-full bg-white/10" />
           <CardContent className="pt-6 relative">
@@ -163,6 +163,15 @@ export default function FaxStatisticsPage() {
             <CheckCircle2 className="h-5 w-5 text-emerald-100 mb-2" />
             <p className="text-sm text-emerald-100">Approved</p>
             <p className="text-3xl font-bold">{stats.approved}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-cyan-500 to-sky-600 text-white shadow-lg shadow-cyan-500/25">
+          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-20 w-20 rounded-full bg-white/10" />
+          <CardContent className="pt-6 relative">
+            <Zap className="h-5 w-5 text-cyan-100 mb-2" />
+            <p className="text-sm text-cyan-100">Auto Approved</p>
+            <p className="text-3xl font-bold">{stats.auto_approved ?? 0}</p>
           </CardContent>
         </Card>
 

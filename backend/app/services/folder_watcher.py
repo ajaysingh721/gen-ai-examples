@@ -25,6 +25,7 @@ class WatcherState:
     files_in_queue: int = 0
     processed_files: set = field(default_factory=set)
     errors: List[str] = field(default_factory=list)
+    currently_processing_file: Optional[str] = None
 
 
 class FaxFolderWatcher:
@@ -192,6 +193,9 @@ class FaxFolderWatcher:
         logger.info(f"Processing new fax: {file_path.name}")
         
         try:
+            # Set currently processing file
+            self._state.currently_processing_file = file_path.name
+            
             result = process_new_fax(
                 file_path=str(file_path.absolute()),
                 filename=file_path.name
@@ -220,6 +224,9 @@ class FaxFolderWatcher:
         except Exception as e:
             logger.error(f"Failed to process {file_path.name}: {e}")
             raise
+        finally:
+            # Clear currently processing file
+            self._state.currently_processing_file = None
     
     def _move_to_processed(self, file_path: Path):
         """Move processed file to a 'processed' subfolder."""

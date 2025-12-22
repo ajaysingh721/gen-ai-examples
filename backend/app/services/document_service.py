@@ -8,6 +8,7 @@ from pypdf import PdfReader
 from PIL import Image, ImageSequence
 import pytesseract
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.core.db import SessionLocal
 from app.models.document_analysis import DocumentAnalysis
@@ -141,7 +142,7 @@ def classify_document_type(text: str) -> tuple[DocumentType, str]:
     cleaned = text.strip()
     if not cleaned or len(cleaned) < 100:
         return (
-            DocumentType.junk,
+            DocumentType.junk_fax,
             "Insufficient extracted text to classify reliably.",
         )
 
@@ -155,9 +156,9 @@ def classify_document_type(text: str) -> tuple[DocumentType, str]:
         "- discharge_summary: a discharge summary for a patient leaving the hospital\n"
         "- inpatient_document: any inpatient progress note, H&P, consult, or other in-hospital documentation\n"
         "- census: a list or table of patients, often with bed numbers, units, or service names\n"
-        "- junk: anything that is not a meaningful clinical or census document (e.g., scanning errors, noise, empty content)\n\n"
+        "- junk_fax: anything that is not a meaningful clinical or census document (e.g., scanning errors, noise, empty content, junk faxes)\n\n"
         "Return STRICT JSON with exactly these keys:\n"
-        "{\"category\": \"discharge_summary|inpatient_document|census|junk\", \"reason\": \"...\"}\n\n"
+        "{\"category\": \"discharge_summary|inpatient_document|census|junk_fax\", \"reason\": \"...\"}\n\n"
         f"Document:\n{snippet}\n"
     )
 
@@ -186,8 +187,8 @@ def classify_document_type(text: str) -> tuple[DocumentType, str]:
         return (DocumentType.inpatient_document, reason or "Classified as inpatient document.")
     if category and "census" in category:
         return (DocumentType.census, reason or "Classified as census.")
-    if category and "junk" in category:
-        return (DocumentType.junk, reason or "Classified as junk.")
+    if category and ("junk" in category or "junk_fax" in category):
+        return (DocumentType.junk_fax, reason or "Classified as junk fax.")
 
     # If the model didn't return JSON, fall back to keyword matching on its raw output.
     if "discharge" in raw_lower:
@@ -197,11 +198,11 @@ def classify_document_type(text: str) -> tuple[DocumentType, str]:
     if "census" in raw_lower:
         return (DocumentType.census, reason or f"Model output: {raw[:300]}")
     if "junk" in raw_lower:
-        return (DocumentType.junk, reason or f"Model output: {raw[:300]}")
+        return (DocumentType.junk_fax, reason or f"Model output: {raw[:300]}")
 
     # Fallback heuristic if LLM output is unclear
     if len(cleaned) < 150:
-        return (DocumentType.junk, "Short document; treating as junk.")
+        return (DocumentType.junk_fax, "Short document; treating as junk fax.")
     if "discharge" in cleaned.lower():
         return (DocumentType.discharge_summary, "Heuristic match for 'discharge'.")
     if "census" in cleaned.lower():
@@ -212,7 +213,7 @@ def classify_document_type(text: str) -> tuple[DocumentType, str]:
             "Heuristic: long clinical text; treating as inpatient document.",
         )
 
-    return (DocumentType.junk, "Classification uncertain; defaulting to junk.")
+    return (DocumentType.junk_fax, "Classification uncertain; defaulting to junk fax.")
 
 
 def summarize_document(text: str, max_tokens: int = 256) -> str:
@@ -236,6 +237,8 @@ def persist_document_analysis(
     doc_type: DocumentType,
     classification_reason: str | None,
     summary: str,
+    review_note: str | None = None,
+    auto_approved: bool = False,
 ) -> DocumentAnalysis:
     """Persist a document analysis result to the SQLite database."""
 
@@ -245,6 +248,8 @@ def persist_document_analysis(
             filename=filename,
             doc_type=doc_type.value,
             classification_reason=classification_reason,
+            review_note=review_note,
+            auto_approved=auto_approved,
             summary=summary,
             text_length=len(text),
             raw_text=text,
@@ -276,6 +281,8 @@ def list_recent_documents(limit: int = 20) -> list[DocumentRecord]:
                 summary=item.summary,
                 text_length=item.text_length,
                 classification_reason=getattr(item, "classification_reason", None),
+                review_note=getattr(item, "review_note", None),
+                auto_approved=getattr(item, "auto_approved", False),
                 created_at=item.created_at,
             )
             for item in items
@@ -319,8 +326,40 @@ def get_document_detail(doc_id: int) -> DocumentDetail | None:
             summary=item.summary,
             text_length=item.text_length,
             classification_reason=getattr(item, "classification_reason", None),
+            review_note=getattr(item, "review_note", None),
+            auto_approved=getattr(item, "auto_approved", False),
             created_at=item.created_at,
             raw_text=item.raw_text,
         )
+    finally:
+        db.close()
+
+
+def get_document_stats() -> dict:
+    """Get statistics about document processing including auto_approved count."""
+    
+    db: Session = SessionLocal()
+    try:
+        total = db.query(func.count(DocumentAnalysis.id)).scalar() or 0
+        auto_approved_count = db.query(func.count(DocumentAnalysis.id)).filter(
+            DocumentAnalysis.auto_approved == True
+        ).scalar() or 0
+        
+        # Category breakdown
+        category_counts = {}
+        cat_results = db.query(
+            DocumentAnalysis.doc_type,
+            func.count(DocumentAnalysis.id)
+        ).group_by(DocumentAnalysis.doc_type).all()
+        
+        for cat, count in cat_results:
+            if cat:
+                category_counts[cat] = count
+        
+        return {
+            "total_documents": total,
+            "auto_approved": auto_approved_count,
+            "category_counts": category_counts,
+        }
     finally:
         db.close()

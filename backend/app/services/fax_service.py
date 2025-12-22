@@ -74,27 +74,21 @@ def categorize_fax(text: str) -> Tuple[FaxCategory, float, str]:
     Returns (category, confidence, reason).
     """
     if not text or len(text.strip()) < 50:
-        return (FaxCategory.unknown, 0.3, "Insufficient text to categorize.")
+        return (FaxCategory.junk_fax, 0.3, "Insufficient text to categorize.")
 
     snippet = text[:4000]  # Limit text sent to LLM
 
-    prompt = f"""You are a medical office fax categorization assistant. Analyze the following fax document and categorize it into ONE of these categories:
+    prompt = f"""You are a clinical documentation classifier. Analyze the following fax document and categorize it into ONE of these categories:
 
-- medical_records: Patient medical records, charts, history
-- lab_results: Laboratory test results, blood work, diagnostic tests
-- prescriptions: Prescription requests, medication orders, refill requests
-- referrals: Patient referrals to specialists or other providers
-- insurance: Insurance forms, authorizations, coverage information
-- billing: Bills, invoices, payment information
-- patient_correspondence: Letters to/from patients, appointment confirmations
-- administrative: Office memos, general administrative documents
-- urgent: Time-sensitive documents requiring immediate attention
-- unknown: Cannot determine category
+- discharge_summary: Patient discharge summaries from hospital stays
+- inpatient_document: Inpatient progress notes, H&P, consults, and other in-hospital documentation
+- census: Patient census lists with bed numbers, units, or service names
+- junk_fax: Non-clinical documents, scanning errors, or spam faxes
 
 Also assess your confidence level (0.0 to 1.0) in this categorization.
 
 Return STRICT JSON with exactly these keys:
-{{"category": "one_of_the_categories", "confidence": 0.85, "reason": "Brief explanation"}}
+{{"category": "discharge_summary|inpatient_document|census|junk_fax", "confidence": 0.85, "reason": "Brief explanation"}}
 
 Fax Document:
 {snippet}
@@ -103,7 +97,7 @@ Fax Document:
     raw = generate_text(prompt, max_tokens=200).strip()
 
     # Try to parse JSON response
-    category = FaxCategory.unknown
+    category = FaxCategory.junk_fax
     confidence = 0.5
     reason = "Unable to determine category"
 
@@ -118,16 +112,10 @@ Fax Document:
 
                 # Map category string to enum
                 category_map = {
-                    "medical_records": FaxCategory.medical_records,
-                    "lab_results": FaxCategory.lab_results,
-                    "prescriptions": FaxCategory.prescriptions,
-                    "referrals": FaxCategory.referrals,
-                    "insurance": FaxCategory.insurance,
-                    "billing": FaxCategory.billing,
-                    "patient_correspondence": FaxCategory.patient_correspondence,
-                    "administrative": FaxCategory.administrative,
-                    "urgent": FaxCategory.urgent,
-                    "unknown": FaxCategory.unknown,
+                    "discharge_summary": FaxCategory.discharge_summary,
+                    "inpatient_document": FaxCategory.inpatient_document,
+                    "census": FaxCategory.census,
+                    "junk_fax": FaxCategory.junk_fax,
                 }
 
                 if cat_str in category_map:
@@ -168,8 +156,8 @@ def detect_urgency(text: str, category: FaxCategory) -> Tuple[bool, int]:
     Returns (is_urgent, priority_score).
     Priority score: 0-100, higher = more urgent.
     """
-    is_urgent = category == FaxCategory.urgent
-    priority = 50 if is_urgent else 0
+    is_urgent = False
+    priority = 0
 
     text_lower = text.lower()
 
@@ -533,6 +521,7 @@ def get_fax_stats() -> FaxStats:
             approved=approved,
             overridden=overridden,
             processed=processed,
+            auto_approved=0,  # Auto-approved document count (placeholder for future implementation)
             category_counts=category_counts,
             total_reviewed=total_reviewed,
             accuracy_rate=accuracy_rate,

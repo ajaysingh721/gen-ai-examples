@@ -19,8 +19,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
-type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk";
+type DocumentType = "discharge_summary" | "inpatient_document" | "census" | "junk_fax";
+
+const documentTypeLabels: Record<DocumentType, string> = {
+  discharge_summary: "Discharge Summary",
+  inpatient_document: "Inpatient Document",
+  census: "Census",
+  junk_fax: "Junk Fax",
+};
 
 interface DocumentRecord {
   id: number;
@@ -29,6 +37,8 @@ interface DocumentRecord {
   summary: string;
   text_length: number;
   classification_reason?: string | null;
+  review_note?: string | null;
+  auto_approved?: boolean;
   created_at: string;
 }
 
@@ -173,6 +183,7 @@ export default function DocumentsPage() {
               <tr>
                 <th className="px-3 py-2">Filename</th>
                 <th className="px-3 py-2">Type</th>
+                <th className="px-3 py-2">Status</th>
                 <th className="px-3 py-2">Characters</th>
                 <th className="px-3 py-2">Created at</th>
                 <th className="px-3 py-2 text-right">Actions</th>
@@ -187,8 +198,17 @@ export default function DocumentsPage() {
                   >
                     {doc.filename}
                   </td>
-                  <td className="px-3 py-2 capitalize">
-                    {doc.doc_type.replace("_", " ")}
+                  <td className="px-3 py-2">
+                    {documentTypeLabels[doc.doc_type] || doc.doc_type}
+                  </td>
+                  <td className="px-3 py-2">
+                    {doc.auto_approved ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+                        Auto Approved
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Manual</Badge>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-zinc-500">{doc.text_length}</td>
                   <td className="px-3 py-2 text-zinc-500">
@@ -262,6 +282,15 @@ export default function DocumentsPage() {
                   {activeDetail.classification_reason}
                 </div>
               )}
+            </section>
+          )}
+
+          {(activeDoc?.review_note || activeDetail?.review_note) && (
+            <section className="mt-3 rounded-md border bg-blue-50 p-3 text-sm">
+              <div className="font-medium text-blue-900">Review Note</div>
+              <div className="text-blue-700 mt-1">
+                {activeDetail?.review_note || activeDoc?.review_note}
+              </div>
             </section>
           )}
 
