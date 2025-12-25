@@ -12,6 +12,7 @@ import {
   Upload,
   BarChart3,
   Zap,
+  Settings,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -40,23 +41,22 @@ export function AppSidebar() {
   const isFaxSettings = pathname === "/faxes/settings";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-slate-200/50 dark:border-slate-800/50">
-      <SidebarHeader className="border-b border-slate-200/50 dark:border-slate-800/50 pb-4">
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              className="pointer-events-none"
               tooltip="Clinical Console"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
-                <Stethoscope className="h-5 w-5" />
+              <span>
+                <Stethoscope />
               </span>
-              <span className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-                <span className="text-base font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span>
+                <span>
                   Clinical Console
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span>
                   AI Document Analysis
                 </span>
               </span>
@@ -65,24 +65,23 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-3 py-2">
-            <Zap className="h-3.5 w-3.5 mr-2 inline" />
+          <SidebarGroupLabel>
+            <Zap />
             Fax Processing
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={isFaxQueue}
                   tooltip="Fax Queue"
-                  className="rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-blue-500/25"
                 >
                   <Link href="/faxes">
-                    <Inbox className="h-4 w-4" />
-                    <span className="font-medium">Fax Queue</span>
+                    <Inbox />
+                    <span>Fax Queue</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -92,11 +91,10 @@ export function AppSidebar() {
                   asChild
                   isActive={isFaxUpload}
                   tooltip="Upload Fax"
-                  className="rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-blue-500/25"
                 >
                   <Link href="/faxes/upload">
-                    <Upload className="h-4 w-4" />
-                    <span className="font-medium">Upload Fax</span>
+                    <Upload />
+                    <span>Upload Fax</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -106,11 +104,10 @@ export function AppSidebar() {
                   asChild
                   isActive={isFaxStatistics}
                   tooltip="Fax Statistics"
-                  className="rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-blue-500/25"
                 >
                   <Link href="/faxes/statistics">
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="font-medium">Statistics</span>
+                    <BarChart3 />
+                    <span>Statistics</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -120,11 +117,10 @@ export function AppSidebar() {
                   asChild
                   isActive={isFaxSettings}
                   tooltip="Fax Settings"
-                  className="rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-500 data-[active=true]:to-indigo-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-blue-500/25"
                 >
                   <Link href="/faxes/settings">
-                    <FileText className="h-4 w-4" />
-                    <span className="font-medium">Settings</span>
+                    <FileText />
+                    <span>Settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -132,23 +128,22 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-3 py-2">
-            <FileText className="h-3.5 w-3.5 mr-2 inline" />
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <FileText />
             Documents
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
                   isActive={isHome} 
                   tooltip="Home"
-                  className="rounded-lg transition-all hover:bg-emerald-50 dark:hover:bg-emerald-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-emerald-500 data-[active=true]:to-teal-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-emerald-500/25"
                 >
                   <Link href="/">
-                    <Home className="h-4 w-4" />
-                    <span className="font-medium">Dashboard</span>
+                    <Home />
+                    <span>Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -158,11 +153,10 @@ export function AppSidebar() {
                   asChild
                   isActive={isUpload}
                   tooltip="Upload & summarize"
-                  className="rounded-lg transition-all hover:bg-emerald-50 dark:hover:bg-emerald-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-emerald-500 data-[active=true]:to-teal-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-emerald-500/25"
                 >
                   <Link href="/upload">
-                    <FileText className="h-4 w-4" />
-                    <span className="font-medium">Upload & Summarize</span>
+                    <FileText />
+                    <span>Upload & Summarize</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -172,11 +166,10 @@ export function AppSidebar() {
                   asChild
                   isActive={!!isDocuments}
                   tooltip="Recent documents"
-                  className="rounded-lg transition-all hover:bg-emerald-50 dark:hover:bg-emerald-950/50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-emerald-500 data-[active=true]:to-teal-500 data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-emerald-500/25"
                 >
                   <Link href="/documents">
-                    <History className="h-4 w-4" />
-                    <span className="font-medium">Recent Documents</span>
+                    <History />
+                    <span>Recent Documents</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -185,16 +178,15 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-slate-200/50 dark:border-slate-800/50 p-3">
+      <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut({ callbackUrl: "/login" })}
               tooltip="Sign out"
-              className="rounded-lg text-slate-600 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-950/50 transition-all"
             >
-              <LogOut className="h-4 w-4" />
-              <span className="font-medium group-data-[collapsible=icon]:hidden">Sign out</span>
+              <LogOut />
+              <span>Sign out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
