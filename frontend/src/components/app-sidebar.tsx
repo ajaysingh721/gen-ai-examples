@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   FileText,
   History,
@@ -13,6 +14,12 @@ import {
   BarChart3,
   Zap,
   Settings,
+  ChevronRight,
+  Folder,
+  Users,
+  Calendar,
+  MessageSquare,
+  Database,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -27,11 +34,21 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuAction,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const [openMenus, setOpenMenus] = useState<string[]>(["fax-processing"]);
+
   const isHome = pathname === "/";
   const isUpload = pathname === "/upload";
   const isDocuments = pathname?.startsWith("/documents");
@@ -39,6 +56,14 @@ export function AppSidebar() {
   const isFaxUpload = pathname === "/faxes/upload";
   const isFaxStatistics = pathname === "/faxes/statistics";
   const isFaxSettings = pathname === "/faxes/settings";
+
+  const toggleMenu = (menuId: string) => {
+    setOpenMenus(prev =>
+      prev.includes(menuId)
+        ? prev.filter(id => id !== menuId)
+        : [...prev, menuId]
+    );
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -86,44 +111,48 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isFaxUpload}
-                  tooltip="Upload Fax"
-                >
-                  <Link href="/faxes/upload">
-                    <Upload />
-                    <span>Upload Fax</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isFaxStatistics}
-                  tooltip="Fax Statistics"
-                >
-                  <Link href="/faxes/statistics">
-                    <BarChart3 />
-                    <span>Statistics</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isFaxSettings}
-                  tooltip="Fax Settings"
-                >
-                  <Link href="/faxes/settings">
-                    <FileText />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <Collapsible
+                open={openMenus.includes("fax-management")}
+                onOpenChange={() => toggleMenu("fax-management")}
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Fax Management">
+                      <Folder />
+                      <span>Fax Management</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton asChild isActive={isFaxUpload}>
+                          <Link href="/faxes/upload">
+                            <Upload />
+                            <span>Upload Fax</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton asChild isActive={isFaxStatistics}>
+                          <Link href="/faxes/statistics">
+                            <BarChart3 />
+                            <span>Statistics</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton asChild isActive={isFaxSettings}>
+                          <Link href="/faxes/settings">
+                            <Settings />
+                            <span>Settings</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -148,31 +177,83 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isUpload}
-                  tooltip="Upload & summarize"
-                >
-                  <Link href="/upload">
-                    <FileText />
-                    <span>Upload & Summarize</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <Collapsible
+                open={openMenus.includes("document-tools")}
+                onOpenChange={() => toggleMenu("document-tools")}
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Document Tools">
+                      <Database />
+                      <span>Document Tools</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton asChild isActive={isUpload}>
+                          <Link href="/upload">
+                            <Upload />
+                            <span>Upload & Summarize</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton asChild isActive={!!isDocuments}>
+                          <Link href="/documents">
+                            <History />
+                            <span>Recent Documents</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton>
+                          <FileText />
+                          <span>Document Templates</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={!!isDocuments}
-                  tooltip="Recent documents"
-                >
-                  <Link href="/documents">
-                    <History />
-                    <span>Recent Documents</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <Collapsible
+                open={openMenus.includes("communication")}
+                onOpenChange={() => toggleMenu("communication")}
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Communication">
+                      <MessageSquare />
+                      <span>Communication</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton>
+                          <Users />
+                          <span>Team Chat</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton>
+                          <Calendar />
+                          <span>Schedule Meeting</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuSubButton>
+                          <MessageSquare />
+                          <span>Patient Messages</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
