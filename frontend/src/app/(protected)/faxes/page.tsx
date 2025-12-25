@@ -390,84 +390,32 @@ export default function FaxQueuePage() {
         </Button>
       </header>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
-          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
-          <CardHeader className="pb-2">
-            <CardDescription className="text-indigo-100">Queue Files</CardDescription>
-            <CardTitle className="text-4xl font-bold text-white">{watcherStatus?.files_in_queue ?? 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 text-sm text-indigo-100">
-                <FolderOpen className="h-4 w-4" />
-                Files in queue
-              </div>
-              {watcherStatus?.currently_processing_file && (
-                <div className="text-xs text-indigo-200 truncate" title={watcherStatus.currently_processing_file}>
-                  Processing: {watcherStatus.currently_processing_file}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* KPI Summary */}
+      <div className="flex flex-wrap gap-3">
+        <Badge variant="secondary" className="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+          <FolderOpen className="h-3 w-3 mr-1.5" />
+          Queue: <span className="font-bold ml-1">{watcherStatus?.files_in_queue ?? 0}</span>
+        </Badge>
 
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25">
-          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
-          <CardHeader className="pb-2">
-            <CardDescription className="text-blue-100">Pending Review</CardDescription>
-            <CardTitle className="text-4xl font-bold text-white">{summary?.pending_review ?? 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 text-sm text-blue-100">
-              <Clock className="h-4 w-4" />
-              Awaiting your decision
-            </div>
-          </CardContent>
-        </Card>
+        <Badge variant="secondary" className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+          <Clock className="h-3 w-3 mr-1.5" />
+          Pending: <span className="font-bold ml-1">{summary?.pending_review ?? 0}</span>
+        </Badge>
 
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25">
-          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
-          <CardHeader className="pb-2">
-            <CardDescription className="text-red-100">Urgent</CardDescription>
-            <CardTitle className="text-4xl font-bold text-white">{summary?.urgent_count ?? 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 text-sm text-red-100">
-              <AlertTriangle className="h-4 w-4" />
-              Requires immediate attention
-            </div>
-          </CardContent>
-        </Card>
+        <Badge variant="secondary" className="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+          <AlertTriangle className="h-3 w-3 mr-1.5" />
+          Urgent: <span className="font-bold ml-1">{summary?.urgent_count ?? 0}</span>
+        </Badge>
 
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
-          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
-          <CardHeader className="pb-2">
-            <CardDescription className="text-emerald-100">Today Received</CardDescription>
-            <CardTitle className="text-4xl font-bold text-white">{summary?.today_received ?? 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 text-sm text-emerald-100">
-              <Upload className="h-4 w-4" />
-              New faxes today
-            </div>
-          </CardContent>
-        </Card>
+        <Badge variant="secondary" className="px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <Upload className="h-3 w-3 mr-1.5" />
+          Received: <span className="font-bold ml-1">{summary?.today_received ?? 0}</span>
+        </Badge>
 
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25">
-          <div className="absolute right-0 top-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-white/10" />
-          <CardHeader className="pb-2">
-            <CardDescription className="text-violet-100">Processed Today</CardDescription>
-            <CardTitle className="text-4xl font-bold text-white">{summary?.today_processed ?? 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 text-sm text-violet-100">
-              <CheckCircle2 className="h-4 w-4" />
-              Reviewed today
-            </div>
-          </CardContent>
-        </Card>
+        <Badge variant="secondary" className="px-3 py-2 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+          <CheckCircle2 className="h-3 w-3 mr-1.5" />
+          Processed: <span className="font-bold ml-1">{summary?.today_processed ?? 0}</span>
+        </Badge>
       </div>
 
       {/* Watcher Status & Controls */}
