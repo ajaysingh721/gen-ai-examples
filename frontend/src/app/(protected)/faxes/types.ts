@@ -7,11 +7,11 @@
 // ENUMS AND CONSTANTS
 // ============================================================================
 
-export type FaxStatus = 
-  | "pending" 
-  | "categorized" 
-  | "approved" 
-  | "overridden" 
+export type FaxStatus =
+  | "pending"
+  | "categorized"
+  | "approved"
+  | "overridden"
   | "processed"
   | "flagged"
   | "archived";
@@ -46,7 +46,12 @@ export type FaxSubCategory =
 
 export type QualityScore = "excellent" | "good" | "fair" | "poor" | "illegible";
 
-export type SentimentType = "neutral" | "urgent" | "routine" | "critical" | "informational";
+export type SentimentType =
+  | "neutral"
+  | "urgent"
+  | "routine"
+  | "critical"
+  | "informational";
 
 // ============================================================================
 // CATEGORY METADATA
@@ -70,7 +75,8 @@ export const categoryLabels: Record<FaxCategory, string> = {
 
 export const categoryDescriptions: Record<FaxCategory, string> = {
   discharge_summary: "Patient discharge summaries from hospital stays",
-  inpatient_document: "Inpatient progress notes, H&P, consults, and other in-hospital documentation",
+  inpatient_document:
+    "Inpatient progress notes, H&P, consults, and other in-hospital documentation",
   census: "Patient census lists with bed numbers, units, or service names",
   junk_fax: "Non-clinical documents, scanning errors, or spam faxes",
   lab_results: "Laboratory test results, blood work, and imaging reports",
@@ -78,22 +84,26 @@ export const categoryDescriptions: Record<FaxCategory, string> = {
   referral: "Patient referrals to specialists or other healthcare facilities",
   insurance_auth: "Insurance authorization requests or approval notifications",
   medical_records_request: "Requests for patient medical records",
-  prior_authorization: "Prior authorization requests for procedures or medications",
-  appointment_related: "Appointment scheduling, confirmations, or cancellations",
+  prior_authorization:
+    "Prior authorization requests for procedures or medications",
+  appointment_related:
+    "Appointment scheduling, confirmations, or cancellations",
   billing_inquiry: "Billing questions, statements, or payment inquiries",
   other_clinical: "Other clinical documents that don't fit standard categories",
 };
 
 export const categoryColors: Record<FaxCategory, string> = {
   discharge_summary: "bg-blue-100 text-blue-700 border border-blue-200",
-  inpatient_document: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  inpatient_document:
+    "bg-emerald-100 text-emerald-700 border border-emerald-200",
   census: "bg-amber-100 text-amber-700 border border-amber-200",
   junk_fax: "bg-slate-100 text-slate-600 border border-slate-200",
   lab_results: "bg-purple-100 text-purple-700 border border-purple-200",
   prescription_refill: "bg-pink-100 text-pink-700 border border-pink-200",
   referral: "bg-cyan-100 text-cyan-700 border border-cyan-200",
   insurance_auth: "bg-orange-100 text-orange-700 border border-orange-200",
-  medical_records_request: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+  medical_records_request:
+    "bg-indigo-100 text-indigo-700 border border-indigo-200",
   prior_authorization: "bg-rose-100 text-rose-700 border border-rose-200",
   appointment_related: "bg-teal-100 text-teal-700 border border-teal-200",
   billing_inquiry: "bg-yellow-100 text-yellow-700 border border-yellow-200",
@@ -176,49 +186,49 @@ export interface FaxRecord {
   id: number;
   filename: string;
   status: FaxStatus;
-  
+
   // AI categorization
   ai_category: FaxCategory | null;
   ai_confidence: number | null;
   ai_reason: string | null;
   ai_sub_category: FaxSubCategory | null;
-  
+
   // Final categorization
   final_category: FaxCategory | null;
   final_sub_category: FaxSubCategory | null;
   was_overridden: boolean;
-  
+
   // Document info
   text_length: number;
   page_count: number;
   summary: string | null;
-  
+
   // Quality & sentiment
   quality_score: QualityScore | null;
   sentiment: SentimentType | null;
-  
+
   // Detected info
   detected_patient_name: string | null;
   detected_sender_facility: string | null;
   suggested_department: string | null;
-  
+
   // Compliance
   contains_phi: boolean;
   detected_language: string;
-  
+
   // Duplicate detection
   is_duplicate: boolean;
-  
+
   // Workflow
   tags: string[] | null;
   assigned_to: string | null;
   due_date: string | null;
   escalated: boolean;
-  
+
   // Urgency
   is_urgent: boolean;
   priority_score: number;
-  
+
   // Timestamps
   received_at: string;
   processed_at: string | null;
@@ -232,38 +242,38 @@ export interface FaxDetail extends FaxRecord {
   original_path: string;
   override_reason: string | null;
   urgency_reason: string | null;
-  
+
   // AI extraction results
   extracted_entities: ExtractedEntity[] | null;
   key_dates: ExtractedDate[] | null;
   action_items: ActionItem[] | null;
   keywords: string[] | null;
   alternative_categories: AlternativeCategory[] | null;
-  
+
   // Patient/Sender details
   detected_patient_dob: string | null;
   detected_patient_mrn: string | null;
   detected_sender_name: string | null;
   detected_sender_fax: string | null;
-  
+
   // Quality details
   quality_issues: string[] | null;
   ocr_confidence: number | null;
   tone_indicators: string[] | null;
-  
+
   // Duplicate info
   similar_fax_ids: number[] | null;
   duplicate_of_id: number | null;
-  
+
   // Routing
   suggested_recipient: string | null;
   routing_confidence: number | null;
-  
+
   // Compliance
   phi_types_detected: string[] | null;
   requires_encryption: boolean;
   needs_translation: boolean;
-  
+
   // Processing info
   processing_time_ms: number | null;
   internal_notes: string | null;
@@ -279,7 +289,7 @@ export interface QueueSummary {
   today_received: number;
   today_processed: number;
   avg_processing_time_minutes: number | null;
-  
+
   // Enhanced metrics
   flagged_count: number;
   escalated_count: number;
@@ -297,7 +307,7 @@ export interface WatcherStatus {
   last_scan_at: string | null;
   errors: string[];
   currently_processing_file: string | null;
-  
+
   // Enhanced metrics
   total_processed_today: number;
   total_failed_today: number;
@@ -328,22 +338,22 @@ export interface FaxStats {
   flagged: number;
   archived: number;
   auto_approved: number;
-  
+
   category_counts: Record<string, number>;
   total_reviewed: number;
   accuracy_rate: number;
   category_accuracy: CategoryAccuracy[] | null;
-  
+
   processed_today: number;
   processed_this_week: number;
-  
+
   // Performance metrics
   avg_processing_time_ms: number | null;
   avg_confidence_score: number | null;
   high_confidence_rate: number | null;
   duplicate_detected_count: number;
   urgent_count: number;
-  
+
   // Quality metrics
   quality_distribution: Record<string, number> | null;
   phi_detected_count: number;
@@ -359,7 +369,7 @@ export interface FaxSettings {
   auto_process: boolean;
   require_review: boolean;
   confidence_threshold: number;
-  
+
   // Feature toggles
   enable_duplicate_detection: boolean;
   duplicate_similarity_threshold: number;
@@ -368,7 +378,7 @@ export interface FaxSettings {
   enable_sentiment_analysis: boolean;
   enable_quality_scoring: boolean;
   enable_routing_suggestions: boolean;
-  
+
   // Workflow settings
   default_language: string;
   sla_hours: number;
