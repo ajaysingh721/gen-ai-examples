@@ -56,6 +56,7 @@ export function AppSidebar() {
   const isFaxUpload = pathname === "/faxes/upload";
   const isFaxStatistics = pathname === "/faxes/statistics";
   const isFaxSettings = pathname === "/faxes/settings";
+  const isAppointments = pathname?.startsWith("/appointments");
 
   const toggleMenu = (menuId: string) => {
     setOpenMenus(prev =>
@@ -153,6 +154,29 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <Calendar />
+            Appointments
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isAppointments}
+                  tooltip="Appointments"
+                >
+                  <Link href="/appointments">
+                    <Calendar />
+                    <span>Appointment Schedule</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

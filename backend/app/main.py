@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1 import api_router
 from app.core.db import Base, engine, ensure_sqlite_schema
 from app.models.fax import Fax, FaxFeedback, FaxSettings  # Import fax models
+from app.models.appointment import Appointment, AppointmentHistory  # Import appointment models
 
 app = FastAPI(title="Backend API", version="0.1.0")
 
