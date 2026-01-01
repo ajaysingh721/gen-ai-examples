@@ -67,25 +67,26 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r-2">
+      <SidebarHeader className="border-b-2 border-sidebar-border/50">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
               tooltip="Clinical Console"
+              className="hover:bg-sidebar-accent transition-all duration-200"
             >
-              <span>
-                <Stethoscope />
-              </span>
-              <span>
-                <span>
+              <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-sidebar-primary-foreground shadow-lg">
+                <Stethoscope className="size-5" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-bold text-base">
                   Clinical Console
                 </span>
-                <span>
+                <span className="truncate text-xs text-sidebar-foreground/70">
                   AI Document Analysis
                 </span>
-              </span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -283,14 +284,15 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t-2 border-sidebar-border/50 p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut({ callbackUrl: "/login" })}
               tooltip="Sign out"
+              className="hover:bg-red-100 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 font-medium"
             >
-              <LogOut />
+              <LogOut className="h-5 w-5" />
               <span>Sign out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>

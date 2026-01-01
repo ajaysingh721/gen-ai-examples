@@ -2,11 +2,14 @@
 API routes for fax processing system.
 """
 
+import logging
 from typing import Optional
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 import os
 import tempfile
 import shutil
+
+logger = logging.getLogger(__name__)
 
 from app.schemas.fax import (
     FaxRecord, FaxDetail, FaxStatus, FaxCategory,
@@ -25,30 +28,11 @@ router = APIRouter(prefix="/api/v1/faxes", tags=["faxes"])
 
 # --- Queue & List Endpoints ---
 
-@router.get("/", response_model=list[FaxRecord])
-async def list_faxes(
-    status: Optional[FaxStatus] = None,
-    category: Optional[FaxCategory] = None,
-    urgent_only: bool = False,
-    limit: int = Query(50, ge=1, le=200),
-    offset: int = Query(0, ge=0)
-) -> list[FaxRecord]:
-    """
-    List faxes with optional filtering.
-    
-    - **status**: Filter by processing status
-    - **category**: Filter by category (AI or final)
-    - **urgent_only**: Show only urgent faxes
-    - **limit**: Maximum number of results
-    - **offset**: Number of results to skip
-    """
-    return fax_service.list_faxes(
-        status=status,
-        category=category,
-        urgent_only=urgent_only,
-        limit=limit,
-        offset=offset
-    )
+@router.get("/")
+async def list_faxes():
+    """List faxes"""
+    logger.info("list_faxes called!")
+    return []
 
 
 # --- Categories Info ---

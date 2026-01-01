@@ -287,6 +287,7 @@ def list_faxes(
     offset: int = 0
 ) -> List[FaxRecord]:
     """List faxes with optional filtering."""
+    print(f"list_faxes called: status={status}, category={category}, urgent_only={urgent_only}, limit={limit}, offset={offset}")
     db: Session = SessionLocal()
     try:
         query = db.query(Fax)
@@ -306,30 +307,44 @@ def list_faxes(
         query = query.offset(offset).limit(limit)
 
         faxes = query.all()
+        print(f"Found {len(faxes)} faxes in database")
 
-        return [
-            FaxRecord(
-                id=f.id,
-                filename=f.filename,
-                status=FaxStatus(f.status),
-                ai_category=FaxCategory(f.ai_category) if f.ai_category else None,
-                ai_confidence=f.ai_confidence,
-                ai_reason=f.ai_reason,
-                final_category=FaxCategory(f.final_category) if f.final_category else None,
-                was_overridden=f.was_overridden,
-                is_urgent=f.is_urgent,
-                priority_score=f.priority_score,
-                text_length=f.text_length,
-                page_count=f.page_count,
-                summary=f.summary,
-                received_at=f.received_at,
-                processed_at=f.processed_at,
-                reviewed_at=f.reviewed_at,
-                reviewed_by=f.reviewed_by,
-                created_at=f.created_at,
-            )
-            for f in faxes
-        ]
+        result = []
+        for f in faxes:
+            try:
+                result.append(FaxRecord(
+                    id=f.id,
+                    filename=f.filename,
+                    status=FaxStatus(f.status),
+                    ai_category=FaxCategory(f.ai_category) if f.ai_category else None,
+                    ai_confidence=f.ai_confidence,
+                    ai_reason=f.ai_reason,
+                    final_category=FaxCategory(f.final_category) if f.final_category else None,
+                    was_overridden=f.was_overridden,
+                    is_urgent=f.is_urgent,
+                    priority_score=getattr(f, 'priority_score', 0),
+                    text_length=f.text_length,
+                    page_count=f.page_count,
+                    summary=f.summary,
+                    received_at=f.received_at,
+                    processed_at=f.processed_at,
+                    reviewed_at=f.reviewed_at,
+                    reviewed_by=f.reviewed_by,
+                    created_at=f.created_at,
+                ))
+            except Exception as e:
+                print(f"Error processing fax {f.id}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                continue
+        
+        print(f"Returning {len(result)} faxes")
+        return result
+    except Exception as e:
+        print(f"Error in list_faxes: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
     finally:
         db.close()
 
@@ -492,6 +507,8 @@ def get_fax_stats() -> FaxStats:
         approved = status_counts.get(FaxStatus.approved.value, 0)
         overridden = status_counts.get(FaxStatus.overridden.value, 0)
         processed = status_counts.get(FaxStatus.processed.value, 0)
+        flagged = status_counts.get(FaxStatus.flagged.value, 0)
+        archived = status_counts.get(FaxStatus.archived.value, 0)
 
         # Category counts (using final_category where available)
         category_counts = {}
@@ -533,6 +550,8 @@ def get_fax_stats() -> FaxStats:
             approved=approved,
             overridden=overridden,
             processed=processed,
+            flagged=flagged,
+            archived=archived,
             auto_approved=auto_approved_count,
             category_counts=category_counts,
             total_reviewed=total_reviewed,

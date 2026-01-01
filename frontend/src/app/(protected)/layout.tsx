@@ -37,8 +37,11 @@ export default function ProtectedLayout({
 
   if (status === "loading") {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-500">Loading session…</p>
+      <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 dark:from-slate-950 dark:via-blue-950/30 dark:to-purple-950/20">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Loading your workspace...</p>
+        </div>
       </div>
     );
   }
@@ -84,45 +87,45 @@ export default function ProtectedLayout({
 
   return (
     <SidebarProvider>
-      <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-foreground flex">
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/20 text-foreground flex">
         <AppSidebar />
 
         <SidebarInset className="w-full">
           <main className="flex-1 flex flex-col w-full">
-            <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50">
+            <header className="sticky top-0 z-10 glass border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
               <div className="px-6 py-4 flex items-center gap-3">
-                <SidebarTrigger className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" />
-                <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+                <SidebarTrigger className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-200 hover:scale-105" />
+                <div className="h-5 w-px bg-gradient-to-b from-slate-200 to-transparent dark:from-slate-700" />
                 <Breadcrumb>
                   <BreadcrumbList>
                     {normalizedPath === "/" ? (
                       <BreadcrumbItem>
-                        <BreadcrumbPage className="font-medium text-slate-900 dark:text-slate-100">{homeCrumb.label}</BreadcrumbPage>
+                        <BreadcrumbPage className="font-semibold text-slate-900 dark:text-slate-100">{homeCrumb.label}</BreadcrumbPage>
                       </BreadcrumbItem>
                     ) : (
                       <>
                         <BreadcrumbItem>
                           <BreadcrumbLink asChild>
-                            <Link href={homeCrumb.href} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors">
+                            <Link href={homeCrumb.href} className="text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors font-medium">
                               {homeCrumb.label}
                             </Link>
                           </BreadcrumbLink>
                         </BreadcrumbItem>
-                        <BreadcrumbSeparator className="text-slate-300 dark:text-slate-600" />
+                        <BreadcrumbSeparator className="text-slate-400 dark:text-slate-600" />
                         {parentCrumb && (
                           <>
                             <BreadcrumbItem>
                               <BreadcrumbLink asChild>
-                                <Link href={parentCrumb.href} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors">
+                                <Link href={parentCrumb.href} className="text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors font-medium">
                                   {parentCrumb.label}
                                 </Link>
                               </BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-slate-300 dark:text-slate-600" />
+                            <BreadcrumbSeparator className="text-slate-400 dark:text-slate-600" />
                           </>
                         )}
                         <BreadcrumbItem>
-                          <BreadcrumbPage className="font-medium text-slate-900 dark:text-slate-100">{currentCrumb.label}</BreadcrumbPage>
+                          <BreadcrumbPage className="font-semibold text-slate-900 dark:text-slate-100">{currentCrumb.label}</BreadcrumbPage>
                         </BreadcrumbItem>
                       </>
                     )}
@@ -130,7 +133,7 @@ export default function ProtectedLayout({
                 </Breadcrumb>
               </div>
             </header>
-            <div className="flex-1 p-6 md:p-8">
+            <div className="flex-1 p-6 md:p-8 max-w-[1600px] mx-auto w-full">
               {children}
             </div>
           </main>
